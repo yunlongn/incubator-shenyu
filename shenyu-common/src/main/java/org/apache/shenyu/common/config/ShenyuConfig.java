@@ -1347,6 +1347,112 @@ public class ShenyuConfig {
             this.props = props;
         }
     }
+
+    /**
+     * The type Instance config.
+     */
+    public static class ClientInstanceConfig {
+
+        private boolean enabled;
+
+        private String registerType;
+
+        private String serverLists;
+
+        private Properties props = new Properties();
+
+        /**
+         * Instantiates a new Instance config.
+         */
+        public ClientInstanceConfig() {
+
+        }
+
+        /**
+         * Instantiates a new Instance config.
+         *
+         * @param registerType the register type
+         * @param serverLists the server lists
+         * @param props the props
+         */
+        public ClientInstanceConfig(final String registerType, final String serverLists, final Properties props) {
+            this.registerType = registerType;
+            this.serverLists = serverLists;
+            this.props = props;
+        }
+
+        /**
+         * Gets enabled.
+         *
+         * @return the enabled
+         */
+        public boolean getEnabled() {
+            return enabled;
+        }
+
+        /**
+         * Sets enabled.
+         *
+         * @param enabled the enabled
+         */
+        public void setEnabled(final boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        /**
+         * getRegisterType.
+         *
+         * @return String register type
+         */
+        public String getRegisterType() {
+            return registerType;
+        }
+
+        /**
+         * setRegisterType.
+         *
+         * @param registerType registerType
+         */
+        public void setRegisterType(final String registerType) {
+            this.registerType = registerType;
+        }
+
+        /**
+         * getServerLists.
+         *
+         * @return String server lists
+         */
+        public String getServerLists() {
+            return serverLists;
+        }
+
+        /**
+         * setServerLists.
+         *
+         * @param serverLists serverLists
+         */
+        public void setServerLists(final String serverLists) {
+            this.serverLists = serverLists;
+        }
+
+        /**
+         * getProps.
+         *
+         * @return String props
+         */
+        public Properties getProps() {
+            return props;
+        }
+
+        /**
+         * setProps.
+         *
+         * @param props props
+         */
+        public void setProps(final Properties props) {
+            this.props = props;
+        }
+    }
     
     /**
      * The Ribbon Config.
