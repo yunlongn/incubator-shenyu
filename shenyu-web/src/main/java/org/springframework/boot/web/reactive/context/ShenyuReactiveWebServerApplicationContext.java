@@ -36,13 +36,13 @@ public class ShenyuReactiveWebServerApplicationContext extends GenericReactiveWe
     private String serverNamespace;
 
     /**
-     * Create a new {@link org.springframework.boot.web.reactive.context.ReactiveWebServerApplicationContext}.
+     * Create a new {@link ReactiveWebServerApplicationContext}.
      */
     public ShenyuReactiveWebServerApplicationContext() {
     }
 
     /**
-     * Create a new {@link org.springframework.boot.web.reactive.context.ReactiveWebServerApplicationContext} with the given
+     * Create a new {@link ReactiveWebServerApplicationContext} with the given
      * {@code DefaultListableBeanFactory}.
      * @param beanFactory the DefaultListableBeanFactory instance to use for this context
      */

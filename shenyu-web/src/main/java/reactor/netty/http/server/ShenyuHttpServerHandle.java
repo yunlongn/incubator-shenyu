@@ -20,12 +20,11 @@ package reactor.netty.http.server;
 import org.reactivestreams.Publisher;
 import reactor.netty.Connection;
 import reactor.netty.ConnectionObserver;
+import static reactor.netty.ReactorNetty.format;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.util.function.BiFunction;
-
-import static reactor.netty.ReactorNetty.format;
 
 public final class ShenyuHttpServerHandle implements ConnectionObserver {
     private static final Logger log = Loggers.getLogger(ShenyuHttpServerHandle.class);

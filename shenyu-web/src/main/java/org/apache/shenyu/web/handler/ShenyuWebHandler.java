@@ -24,6 +24,9 @@ import org.apache.shenyu.common.dto.PluginData;
 import org.apache.shenyu.common.enums.PluginHandlerEventEnum;
 import org.apache.shenyu.plugin.api.ShenyuPlugin;
 import org.apache.shenyu.plugin.api.ShenyuPluginChain;
+import org.apache.shenyu.plugin.api.result.ShenyuResultEnum;
+import org.apache.shenyu.plugin.api.result.ShenyuResultWrap;
+import org.apache.shenyu.plugin.api.utils.WebFluxResultUtils;
 import org.apache.shenyu.plugin.base.cache.BaseDataCache;
 import org.apache.shenyu.plugin.base.cache.PluginHandlerEvent;
 import org.apache.shenyu.web.loader.ShenyuLoaderService;
@@ -98,11 +101,22 @@ public final class ShenyuWebHandler implements WebHandler, ApplicationListener<P
      */
     @Override
     public Mono<Void> handle(@NonNull final ServerWebExchange exchange) {
-        Mono<Void> execute = new DefaultShenyuPluginChain(plugins).execute(exchange);
-        if (scheduled) {
-            return execute.subscribeOn(scheduler);
-        }
-        return execute;
+        new Thread(() -> {
+            
+            try {
+                Mono<Void> execute = new DefaultShenyuPluginChain(plugins).execute(exchange);
+                Thread.sleep(30000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            Object error = ShenyuResultWrap.success(exchange, "shenyu web handler");
+            WebFluxResultUtils.result(exchange, error).subscribe();
+        }).start();
+        
+        //if (scheduled) {
+        //    return execute.subscribeOn(scheduler);
+        //}
+        return Mono.empty();
     }
     
     /**

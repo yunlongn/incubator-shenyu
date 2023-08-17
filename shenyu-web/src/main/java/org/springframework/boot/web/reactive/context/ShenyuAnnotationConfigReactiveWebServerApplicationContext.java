@@ -70,7 +70,7 @@ public class ShenyuAnnotationConfigReactiveWebServerApplicationContext extends S
     private String[] basePackages;
 
     /**
-     * Create a new {@link org.springframework.boot.web.reactive.context.AnnotationConfigReactiveWebServerApplicationContext} that needs
+     * Create a new {@link AnnotationConfigReactiveWebServerApplicationContext} that needs
      * to be populated through {@link #register} calls and then manually
      * {@linkplain #refresh refreshed}.
      */
@@ -80,7 +80,7 @@ public class ShenyuAnnotationConfigReactiveWebServerApplicationContext extends S
     }
 
     /**
-     * Create a new {@link org.springframework.boot.web.reactive.context.AnnotationConfigReactiveWebServerApplicationContext} with the
+     * Create a new {@link AnnotationConfigReactiveWebServerApplicationContext} with the
      * given {@code DefaultListableBeanFactory}. The context needs to be populated through
      * {@link #register} calls and then manually {@linkplain #refresh refreshed}.
      * @param beanFactory the DefaultListableBeanFactory instance to use for this context
@@ -92,7 +92,7 @@ public class ShenyuAnnotationConfigReactiveWebServerApplicationContext extends S
     }
 
     /**
-     * Create a new {@link org.springframework.boot.web.reactive.context.AnnotationConfigReactiveWebServerApplicationContext}, deriving
+     * Create a new {@link AnnotationConfigReactiveWebServerApplicationContext}, deriving
      * bean definitions from the given annotated classes and automatically refreshing the
      * context.
      * @param annotatedClasses one or more annotated classes, e.g. {@code @Configuration}
@@ -104,7 +104,7 @@ public class ShenyuAnnotationConfigReactiveWebServerApplicationContext extends S
     }
 
     /**
-     * Create a new {@link org.springframework.boot.web.reactive.context.AnnotationConfigReactiveWebServerApplicationContext}, scanning
+     * Create a new {@link AnnotationConfigReactiveWebServerApplicationContext}, scanning
      * for bean definitions in the given packages and automatically refreshing the
      * context.
      * @param basePackages the packages to check for annotated classes
@@ -205,7 +205,7 @@ public class ShenyuAnnotationConfigReactiveWebServerApplicationContext extends S
 
     /**
      * {@link ApplicationContextFactory} registered in {@code spring.factories} to support
-     * {@link org.springframework.boot.web.reactive.context.AnnotationConfigReactiveWebServerApplicationContext}.
+     * {@link AnnotationConfigReactiveWebServerApplicationContext}.
      */
     public static class Factory implements ApplicationContextFactory {
 
