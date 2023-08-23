@@ -20,8 +20,8 @@ package org.springframework.boot.web.embedded.netty;
 import org.springframework.boot.web.server.AbstractConfigurableWebServerFactory;
 import org.springframework.boot.web.server.Shutdown;
 import org.springframework.boot.web.server.WebServer;
+import org.springframework.http.server.reactive.ShenyuReactorHttpHandlerAdapter;
 import org.springframework.util.Assert;
-import org.apache.shenyu.web.adater.ReactorHttpHandlerAdapter;
 import reactor.netty.http.HttpProtocol;
 import reactor.netty.http.server.HttpServer;
 
@@ -65,14 +65,14 @@ public class ShenyuNettyReactiveWebServerFactory extends AbstractConfigurableWeb
      */
     public WebServer getWebServer() {
         HttpServer httpServer = createHttpServer();
-        ReactorHttpHandlerAdapter handlerAdapter = new ReactorHttpHandlerAdapter();
+        ShenyuReactorHttpHandlerAdapter handlerAdapter = new ShenyuReactorHttpHandlerAdapter();
         ShenyuNettyWebServer webServer = createShenyuNettyWebServer(httpServer, handlerAdapter, this.lifecycleTimeout,
                 getShutdown());
         webServer.setRouteProviders(this.routeProviders);
         return webServer;
     }
 
-    ShenyuNettyWebServer createShenyuNettyWebServer(final HttpServer httpServer, final ReactorHttpHandlerAdapter handlerAdapter,
+    ShenyuNettyWebServer createShenyuNettyWebServer(final HttpServer httpServer, final ShenyuReactorHttpHandlerAdapter handlerAdapter,
                                                     final Duration lifecycleTimeout, final Shutdown shutdown) {
         return new ShenyuNettyWebServer(httpServer, handlerAdapter, lifecycleTimeout, shutdown);
     }

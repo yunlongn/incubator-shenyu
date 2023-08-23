@@ -22,7 +22,6 @@ import io.netty.channel.unix.Errors;
 import io.netty.util.concurrent.DefaultEventExecutor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.shenyu.web.adater.ReactorHttpHandlerAdapter;
 import org.reactivestreams.Publisher;
 import org.springframework.boot.web.server.GracefulShutdownCallback;
 import org.springframework.boot.web.server.GracefulShutdownResult;
@@ -30,6 +29,7 @@ import org.springframework.boot.web.server.PortInUseException;
 import org.springframework.boot.web.server.Shutdown;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.boot.web.server.WebServerException;
+import org.springframework.http.server.reactive.ShenyuReactorHttpHandlerAdapter;
 import org.springframework.util.Assert;
 import reactor.netty.ChannelBindException;
 import reactor.netty.DisposableServer;
@@ -75,7 +75,7 @@ public class ShenyuNettyWebServer implements WebServer {
 
     private List<NettyRouteProvider> routeProviders = Collections.emptyList();
 
-    public ShenyuNettyWebServer(final HttpServer httpServer, final ReactorHttpHandlerAdapter handlerAdapter, final Duration lifecycleTimeout,
+    public ShenyuNettyWebServer(final HttpServer httpServer, final ShenyuReactorHttpHandlerAdapter handlerAdapter, final Duration lifecycleTimeout,
                                 final Shutdown shutdown) {
         Assert.notNull(httpServer, "HttpServer must not be null");
         Assert.notNull(handlerAdapter, "HandlerAdapter must not be null");
@@ -117,8 +117,8 @@ public class ShenyuNettyWebServer implements WebServer {
 
     private String getStartedOnMessage(final DisposableServer server) {
         StringBuilder message = new StringBuilder();
-        tryAppend(message, "port %s", server::port);
-        tryAppend(message, "path %s", server::path);
+        //tryAppend(message, "port %s", server::port);
+        //tryAppend(message, "path %s", server::path);
         return (message.length() > 0) ? " on " + message : "";
     }
 

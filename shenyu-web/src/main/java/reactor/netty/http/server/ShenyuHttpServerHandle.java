@@ -17,12 +17,15 @@
 
 package reactor.netty.http.server;
 
+import io.netty.buffer.Unpooled;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
 import reactor.netty.Connection;
 import reactor.netty.ConnectionObserver;
 import static reactor.netty.ReactorNetty.format;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.context.Context;
 
 import java.util.function.BiFunction;
 
@@ -38,13 +41,38 @@ public final class ShenyuHttpServerHandle implements ConnectionObserver {
     @Override
     @SuppressWarnings("FutureReturnValueIgnored")
     public void onStateChange(final Connection connection, final State newState) {
+        //if (newState == HttpServerState.REQUEST_RECEIVED) {
+        //    try {
+        //        if (log.isDebugEnabled()) {
+        //            log.debug(format(connection.channel(), "Handler is being applied: {}"), handler);
+        //        }
+        //        HttpServerOperations ops = (HttpServerOperations) connection;
+        //        handler.apply(ops, ops);
+        //    } catch (Throwable t) {
+        //        log.error(format(connection.channel(), ""), t);
+        //        //"FutureReturnValueIgnored" this is deliberate
+        //        connection.channel()
+        //                .close();
+        //    }
+        //}
+        
+        
         if (newState == HttpServerState.REQUEST_RECEIVED) {
             try {
                 if (log.isDebugEnabled()) {
                     log.debug(format(connection.channel(), "Handler is being applied: {}"), handler);
                 }
                 HttpServerOperations ops = (HttpServerOperations) connection;
-                handler.apply(ops, ops);
+                Publisher<Void> publisher = handler.apply(ops, ops);
+                Mono<Void> mono = Mono.deferContextual(ctx -> {
+                    ops.currentContext = Context.of(ctx);
+                    return Mono.fromDirect(publisher);
+                });
+                if (ops.mapHandle != null) {
+                    mono = ops.mapHandle.apply(mono, connection);
+                }
+                ops.send(Mono.just(Unpooled.copiedBuffer("hello world".getBytes()))).then().subscribe();
+                mono.subscribe(ops.disposeSubscriber());
             } catch (Throwable t) {
                 log.error(format(connection.channel(), ""), t);
                 //"FutureReturnValueIgnored" this is deliberate
