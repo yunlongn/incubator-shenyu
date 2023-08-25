@@ -123,9 +123,13 @@ public class ShenyuNettyWebServer implements WebServer {
     }
 
     private void tryAppend(final StringBuilder message, final String format, final Supplier<Object> supplier) {
-        Object value = supplier.get();
-        message.append((message.length() != 0) ? " " : "");
-        message.append(String.format(format, value));
+        try {
+            Object value = supplier.get();
+            message.append((message.length() != 0) ? " " : "");
+            message.append(String.format(format, value));
+        } catch (UnsupportedOperationException ex) {
+            // Ignore
+        }
     }
 
     DisposableServer startHttpServer() {
