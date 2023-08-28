@@ -71,7 +71,6 @@ public final class ShenyuHttpServerHandle implements ConnectionObserver {
                 if (ops.mapHandle != null) {
                     mono = ops.mapHandle.apply(mono, connection);
                 }
-                //ops.send(Mono.just(Unpooled.copiedBuffer("hello world".getBytes()))).then().subscribe();
                 //mono.subscribe(ops.disposeSubscriber());
             } catch (Throwable t) {
                 log.error(format(connection.channel(), ""), t);

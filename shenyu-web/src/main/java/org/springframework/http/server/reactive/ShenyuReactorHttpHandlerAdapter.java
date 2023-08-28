@@ -61,7 +61,6 @@ public class ShenyuReactorHttpHandlerAdapter extends ReactorHttpHandlerAdapter i
                 if (request.getMethod() == HttpMethod.HEAD) {
                     response = new HttpHeadResponseDecorator(response);
                 }
-                System.out.println("thread name:" + Thread.currentThread().getName());
                 this.httpHandler.handle(request, response)
                         .doOnError(ex -> LOGGER.trace(request.getLogPrefix() + "Failed to complete: " + ex.getMessage()))
                         .doOnSuccess(aVoid -> LOGGER.trace(request.getLogPrefix() + "Handling completed"))
@@ -71,7 +70,6 @@ public class ShenyuReactorHttpHandlerAdapter extends ReactorHttpHandlerAdapter i
                     LOGGER.debug("Failed to get request URI: " + ex.getMessage());
                 }
                 reactorResponse.status(HttpResponseStatus.BAD_REQUEST);
-                //return Mono.empty();
             }
         }).start();
         return Mono.empty();
