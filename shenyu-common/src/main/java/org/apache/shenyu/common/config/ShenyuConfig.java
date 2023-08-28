@@ -1953,4 +1953,8 @@ public class ShenyuConfig {
             this.enabled = enabled;
         }
     }
+    
+    public static class ShenyuWorkThreadPool {
+    
+    }
 }

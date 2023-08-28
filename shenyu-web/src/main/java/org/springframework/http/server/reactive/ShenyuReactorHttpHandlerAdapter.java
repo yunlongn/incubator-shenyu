@@ -17,12 +17,18 @@
 
 package org.springframework.http.server.reactive;
 
+import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.apache.commons.logging.Log;
+import org.apache.shenyu.disruptor.consumer.QueueConsumerExecutor;
+import org.apache.shenyu.disruptor.consumer.QueueConsumerFactory;
+import org.apache.shenyu.web.disruptor.ShenyuRequestEventPublisher;
+import org.apache.shenyu.web.server.ShenyuServerExchange;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
+import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.server.HttpServerRequest;
 import reactor.netty.http.server.HttpServerResponse;
@@ -35,6 +41,8 @@ public class ShenyuReactorHttpHandlerAdapter extends ReactorHttpHandlerAdapter i
     private static final Log LOGGER = HttpLogging.forLogName(ReactorHttpHandlerAdapter.class);
     
     private final HttpHandler httpHandler;
+    
+    private final ShenyuRequestEventPublisher shenyuRequestEventPublisher = ShenyuRequestEventPublisher.getInstance();
     
     public ShenyuReactorHttpHandlerAdapter(final HttpHandler httpHandler) {
         super(httpHandler);
@@ -51,27 +59,29 @@ public class ShenyuReactorHttpHandlerAdapter extends ReactorHttpHandlerAdapter i
      */
     @Override
     public Mono<Void> apply(final HttpServerRequest reactorRequest, final HttpServerResponse reactorResponse) {
-        
-        new Thread(() -> {
-            NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(reactorResponse.alloc());
-            try {
-                ReactorServerHttpRequest request = new ReactorServerHttpRequest(reactorRequest, bufferFactory);
-                ServerHttpResponse response = new ReactorServerHttpResponse(reactorResponse, bufferFactory);
-                
-                if (request.getMethod() == HttpMethod.HEAD) {
-                    response = new HttpHeadResponseDecorator(response);
-                }
-                this.httpHandler.handle(request, response)
-                        .doOnError(ex -> LOGGER.trace(request.getLogPrefix() + "Failed to complete: " + ex.getMessage()))
-                        .doOnSuccess(aVoid -> LOGGER.trace(request.getLogPrefix() + "Handling completed"))
-                        .subscribe();
-            } catch (URISyntaxException ex) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Failed to get request URI: " + ex.getMessage());
-                }
-                reactorResponse.status(HttpResponseStatus.BAD_REQUEST);
-            }
-        }).start();
+        //DefaultServerWebExchange exchange = new DefaultServerWebExchange(reactorRequest, reactorResponse);
+        ShenyuServerExchange exchange = new ShenyuServerExchange(reactorRequest, reactorResponse, httpHandler);
+        shenyuRequestEventPublisher.publishEvent(exchange);
+        //new Thread(() -> {
+        //    NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(reactorResponse.alloc());
+        //    try {
+        //        ReactorServerHttpRequest request = new ReactorServerHttpRequest(reactorRequest, bufferFactory);
+        //        ServerHttpResponse response = new ReactorServerHttpResponse(reactorResponse, bufferFactory);
+        //
+        //        if (request.getMethod() == HttpMethod.HEAD) {
+        //            response = new HttpHeadResponseDecorator(response);
+        //        }
+        //        this.httpHandler.handle(request, response)
+        //                .doOnError(ex -> LOGGER.trace(request.getLogPrefix() + "Failed to complete: " + ex.getMessage()))
+        //                .doOnSuccess(aVoid -> LOGGER.trace(request.getLogPrefix() + "Handling completed"))
+        //                .subscribe();
+        //    } catch (URISyntaxException ex) {
+        //        if (LOGGER.isDebugEnabled()) {
+        //            LOGGER.debug("Failed to get request URI: " + ex.getMessage());
+        //        }
+        //        reactorResponse.status(HttpResponseStatus.BAD_REQUEST);
+        //    }
+        //}).start();
         return Mono.empty();
     }
 

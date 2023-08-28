@@ -41,22 +41,6 @@ public final class ShenyuHttpServerHandle implements ConnectionObserver {
     @Override
     @SuppressWarnings("FutureReturnValueIgnored")
     public void onStateChange(final Connection connection, final State newState) {
-        //if (newState == HttpServerState.REQUEST_RECEIVED) {
-        //    try {
-        //        if (log.isDebugEnabled()) {
-        //            log.debug(format(connection.channel(), "Handler is being applied: {}"), handler);
-        //        }
-        //        HttpServerOperations ops = (HttpServerOperations) connection;
-        //        handler.apply(ops, ops);
-        //    } catch (Throwable t) {
-        //        log.error(format(connection.channel(), ""), t);
-        //        //"FutureReturnValueIgnored" this is deliberate
-        //        connection.channel()
-        //                .close();
-        //    }
-        //}
-        
-        
         if (newState == HttpServerState.REQUEST_RECEIVED) {
             try {
                 if (log.isDebugEnabled()) {

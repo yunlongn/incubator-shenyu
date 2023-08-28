@@ -47,6 +47,8 @@ public class ShenyuNettyReactiveWebServerFactory extends NettyReactiveWebServerF
     private Duration lifecycleTimeout;
 
     private boolean useForwardHeaders;
+    
+    private Shutdown shutdown;
 
     public ShenyuNettyReactiveWebServerFactory() {
         serverCustomizers = (Set<NettyServerCustomizer>) getServerCustomizers();
