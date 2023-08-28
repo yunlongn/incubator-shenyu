@@ -51,33 +51,30 @@ public class ShenyuReactorHttpHandlerAdapter extends ReactorHttpHandlerAdapter i
      */
     @Override
     public Mono<Void> apply(final HttpServerRequest reactorRequest, final HttpServerResponse reactorResponse) {
-        NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(reactorResponse.alloc());
-        try {
-            ReactorServerHttpRequest request = new ReactorServerHttpRequest(reactorRequest, bufferFactory);
-            ServerHttpResponse response = new ReactorServerHttpResponse(reactorResponse, bufferFactory);
-
-            if (request.getMethod() == HttpMethod.HEAD) {
-                response = new HttpHeadResponseDecorator(response);
+        
+        new Thread(() -> {
+            NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(reactorResponse.alloc());
+            try {
+                ReactorServerHttpRequest request = new ReactorServerHttpRequest(reactorRequest, bufferFactory);
+                ServerHttpResponse response = new ReactorServerHttpResponse(reactorResponse, bufferFactory);
+                
+                if (request.getMethod() == HttpMethod.HEAD) {
+                    response = new HttpHeadResponseDecorator(response);
+                }
+                System.out.println("thread name:" + Thread.currentThread().getName());
+                this.httpHandler.handle(request, response)
+                        .doOnError(ex -> LOGGER.trace(request.getLogPrefix() + "Failed to complete: " + ex.getMessage()))
+                        .doOnSuccess(aVoid -> LOGGER.trace(request.getLogPrefix() + "Handling completed"))
+                        .subscribe();
+            } catch (URISyntaxException ex) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Failed to get request URI: " + ex.getMessage());
+                }
+                reactorResponse.status(HttpResponseStatus.BAD_REQUEST);
+                //return Mono.empty();
             }
-            return this.httpHandler.handle(request, response)
-                    .doOnError(ex -> LOGGER.trace(request.getLogPrefix() + "Failed to complete: " + ex.getMessage()))
-                    .doOnSuccess(aVoid -> LOGGER.trace(request.getLogPrefix() + "Handling completed"));
-        } catch (URISyntaxException ex) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Failed to get request URI: " + ex.getMessage());
-            }
-            reactorResponse.status(HttpResponseStatus.BAD_REQUEST);
-            return Mono.empty();
-        }
-        //new Thread(() -> {
-        //    try {
-        //        Thread.sleep(5000L);
-        //    } catch (InterruptedException e) {
-        //        throw new RuntimeException(e);
-        //    }
-        //    reactorResponse.send(Mono.just(Unpooled.copiedBuffer("hello world".getBytes()))).then().subscribe();
-        //}).start();
-        //return Mono.empty();
+        }).start();
+        return Mono.empty();
     }
 
 }

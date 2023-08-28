@@ -49,6 +49,7 @@ public class ShenyuNettyReactiveWebServerFactory extends NettyReactiveWebServerF
     private Shutdown shutdown;
 
     public ShenyuNettyReactiveWebServerFactory() {
+        serverCustomizers = (Set<NettyServerCustomizer>) getServerCustomizers();
     }
 
     public ShenyuNettyReactiveWebServerFactory(final int port) {
@@ -57,6 +58,8 @@ public class ShenyuNettyReactiveWebServerFactory extends NettyReactiveWebServerF
 
     /**
      * getWebServer.
+     *
+     * @param httpHandler httpHandler
      *
      * @return {@link WebServer}
      */

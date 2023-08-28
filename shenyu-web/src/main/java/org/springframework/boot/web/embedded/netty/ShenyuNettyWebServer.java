@@ -39,8 +39,6 @@ import reactor.netty.http.server.HttpServerResponse;
 import reactor.netty.http.server.ShenyuHttpServerHandle;
 
 import java.time.Duration;
-import java.util.Collections;
-import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -76,8 +74,8 @@ public class ShenyuNettyWebServer extends NettyWebServer {
     public ShenyuNettyWebServer(final HttpServer httpServer, final ShenyuReactorHttpHandlerAdapter handlerAdapter, final Duration lifecycleTimeout,
                                 final Shutdown shutdown) {
         super(httpServer, handlerAdapter, lifecycleTimeout, shutdown);
-        //Assert.notNull(httpServer, "HttpServer must not be null");
-        //Assert.notNull(handlerAdapter, "HandlerAdapter must not be null");
+        Assert.notNull(httpServer, "HttpServer must not be null");
+        Assert.notNull(handlerAdapter, "HandlerAdapter must not be null");
         this.lifecycleTimeout = lifecycleTimeout;
         this.handler = handlerAdapter;
         this.httpServer = httpServer.channelGroup(new DefaultChannelGroup(new DefaultEventExecutor()));
@@ -137,16 +135,16 @@ public class ShenyuNettyWebServer extends NettyWebServer {
         }
         return false;
     }
-    //
-    //@Override
-    //public void shutDownGracefully(final GracefulShutdownCallback callback) {
-    //    if (this.gracefulShutdown == null) {
-    //        callback.shutdownComplete(GracefulShutdownResult.IMMEDIATE);
-    //        return;
-    //    }
-    //    this.gracefulShutdown.shutDownGracefully(callback);
-    //}
-    //
+
+    @Override
+    public void shutDownGracefully(final GracefulShutdownCallback callback) {
+        if (this.gracefulShutdown == null) {
+            callback.shutdownComplete(GracefulShutdownResult.IMMEDIATE);
+            return;
+        }
+        this.gracefulShutdown.shutDownGracefully(callback);
+    }
+
     private void startDaemonAwaitThread(final DisposableServer disposableServer) {
         Thread awaitThread = new Thread("server") {
 
@@ -160,35 +158,35 @@ public class ShenyuNettyWebServer extends NettyWebServer {
         awaitThread.setDaemon(false);
         awaitThread.start();
     }
-    //
-    //@Override
-    //public void stop() throws WebServerException {
-    //    if (this.disposableServer != null) {
-    //        if (this.gracefulShutdown != null) {
-    //            this.gracefulShutdown.abort();
-    //        }
-    //        try {
-    //            if (this.lifecycleTimeout != null) {
-    //                this.disposableServer.disposeNow(this.lifecycleTimeout);
-    //            } else {
-    //                this.disposableServer.disposeNow();
-    //            }
-    //        } catch (IllegalStateException ex) {
-    //            // Continue
-    //        }
-    //        this.disposableServer = null;
-    //    }
-    //}
-    //
-    //@Override
-    //public int getPort() {
-    //    if (this.disposableServer != null) {
-    //        try {
-    //            return this.disposableServer.port();
-    //        } catch (UnsupportedOperationException ex) {
-    //            return -1;
-    //        }
-    //    }
-    //    return -1;
-    //}
+
+    @Override
+    public void stop() throws WebServerException {
+        if (this.disposableServer != null) {
+            if (this.gracefulShutdown != null) {
+                this.gracefulShutdown.abort();
+            }
+            try {
+                if (this.lifecycleTimeout != null) {
+                    this.disposableServer.disposeNow(this.lifecycleTimeout);
+                } else {
+                    this.disposableServer.disposeNow();
+                }
+            } catch (IllegalStateException ex) {
+                // Continue
+            }
+            this.disposableServer = null;
+        }
+    }
+
+    @Override
+    public int getPort() {
+        if (this.disposableServer != null) {
+            try {
+                return this.disposableServer.port();
+            } catch (UnsupportedOperationException ex) {
+                return -1;
+            }
+        }
+        return -1;
+    }
 }
