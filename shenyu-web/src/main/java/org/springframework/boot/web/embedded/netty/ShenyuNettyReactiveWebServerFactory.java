@@ -125,4 +125,13 @@ public class ShenyuNettyReactiveWebServerFactory extends NettyReactiveWebServerF
         }
         return resultServer;
     }
+
+    /**
+     * Set if x-forward-* headers should be processed.
+     * @param useForwardHeaders if x-forward headers should be used
+     * @since 2.1.0
+     */
+    public void setUseForwardHeaders(final boolean useForwardHeaders) {
+        this.useForwardHeaders = useForwardHeaders;
+    }
 }

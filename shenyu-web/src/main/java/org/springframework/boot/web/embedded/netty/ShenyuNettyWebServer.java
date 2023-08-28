@@ -51,12 +51,12 @@ import java.util.function.Supplier;
  * @since 2.0.0
  */
 public class ShenyuNettyWebServer extends NettyWebServer {
-    
+
     /**
      * Permission denied error code from {@code errno.h}.
      */
     private static final int ERROR_NO_EACCES = -13;
-    
+
     private static final Predicate<HttpServerRequest> ALWAYS = request -> true;
 
     private static final Log LOGGER = LogFactory.getLog(ShenyuNettyWebServer.class);
@@ -102,11 +102,11 @@ public class ShenyuNettyWebServer extends NettyWebServer {
             startDaemonAwaitThread(this.disposableServer);
         }
     }
-    
+
     private String getStartedOnMessage(final DisposableServer server) {
         StringBuilder message = new StringBuilder();
         tryAppend(message, "port %s", server::port);
-        //tryAppend(message, "path %s", server::path);
+        tryAppend(message, "path %s", server::path);
         return (message.length() > 0) ? " on " + message : "";
     }
 
