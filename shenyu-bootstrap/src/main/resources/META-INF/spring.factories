@@ -1,2 +1,2 @@
 org.springframework.boot.ApplicationContextFactory=\
-org.springframework.boot.web.reactive.context.ShenyuAnnotationConfigReactiveWebServerApplicationContext.Factory
+org.springframework.boot.web.reactive.context.ShenyuAdapterAnnotationConfigReactiveWebServerApplicationContext.Factory

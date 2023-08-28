@@ -18,21 +18,22 @@
 package org.springframework.http.server.reactive;
 
 
-import io.netty.handler.codec.http.HttpResponseStatus;
 import org.apache.commons.logging.Log;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpLogging;
-import org.springframework.http.HttpMethod;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.server.HttpServerRequest;
 import reactor.netty.http.server.HttpServerResponse;
 
-import java.net.URISyntaxException;
 import java.util.function.BiFunction;
 
-public class ShenyuReactorHttpHandlerAdapter implements BiFunction<HttpServerRequest, HttpServerResponse, Mono<Void>> {
+public class ShenyuReactorHttpHandlerAdapter extends ReactorHttpHandlerAdapter implements BiFunction<HttpServerRequest, HttpServerResponse, Mono<Void>> {
     
-    private static final Log logger = HttpLogging.forLogName(ReactorHttpHandlerAdapter.class);
+    private static final Log LOGGER = HttpLogging.forLogName(ReactorHttpHandlerAdapter.class);
+    
+    public ShenyuReactorHttpHandlerAdapter(final HttpHandler httpHandler) {
+        super(httpHandler);
+    }
     
     /**
      * apply.

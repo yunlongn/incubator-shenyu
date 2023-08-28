@@ -52,13 +52,13 @@ import java.util.function.Supplier;
  *
  * @since 2.0.0
  */
-public class ShenyuNettyWebServer implements WebServer {
-
+public class ShenyuNettyWebServer extends NettyWebServer {
+    
     /**
      * Permission denied error code from {@code errno.h}.
      */
     private static final int ERROR_NO_EACCES = -13;
-
+    
     private static final Predicate<HttpServerRequest> ALWAYS = request -> true;
 
     private static final Log LOGGER = LogFactory.getLog(ShenyuNettyWebServer.class);
@@ -73,12 +73,11 @@ public class ShenyuNettyWebServer implements WebServer {
 
     private volatile DisposableServer disposableServer;
 
-    private List<NettyRouteProvider> routeProviders = Collections.emptyList();
-
     public ShenyuNettyWebServer(final HttpServer httpServer, final ShenyuReactorHttpHandlerAdapter handlerAdapter, final Duration lifecycleTimeout,
                                 final Shutdown shutdown) {
-        Assert.notNull(httpServer, "HttpServer must not be null");
-        Assert.notNull(handlerAdapter, "HandlerAdapter must not be null");
+        super(httpServer, handlerAdapter, lifecycleTimeout, shutdown);
+        //Assert.notNull(httpServer, "HttpServer must not be null");
+        //Assert.notNull(handlerAdapter, "HandlerAdapter must not be null");
         this.lifecycleTimeout = lifecycleTimeout;
         this.handler = handlerAdapter;
         this.httpServer = httpServer.channelGroup(new DefaultChannelGroup(new DefaultEventExecutor()));
@@ -105,19 +104,10 @@ public class ShenyuNettyWebServer implements WebServer {
             startDaemonAwaitThread(this.disposableServer);
         }
     }
-
-    /**
-     * setRouteProviders.
-     *
-     * @param routeProviders routeProviders
-     */
-    public void setRouteProviders(final List<NettyRouteProvider> routeProviders) {
-        this.routeProviders = routeProviders;
-    }
-
+    
     private String getStartedOnMessage(final DisposableServer server) {
         StringBuilder message = new StringBuilder();
-        //tryAppend(message, "port %s", server::port);
+        tryAppend(message, "port %s", server::port);
         //tryAppend(message, "path %s", server::path);
         return (message.length() > 0) ? " on " + message : "";
     }
@@ -143,16 +133,16 @@ public class ShenyuNettyWebServer implements WebServer {
         }
         return false;
     }
-
-    @Override
-    public void shutDownGracefully(final GracefulShutdownCallback callback) {
-        if (this.gracefulShutdown == null) {
-            callback.shutdownComplete(GracefulShutdownResult.IMMEDIATE);
-            return;
-        }
-        this.gracefulShutdown.shutDownGracefully(callback);
-    }
-
+    //
+    //@Override
+    //public void shutDownGracefully(final GracefulShutdownCallback callback) {
+    //    if (this.gracefulShutdown == null) {
+    //        callback.shutdownComplete(GracefulShutdownResult.IMMEDIATE);
+    //        return;
+    //    }
+    //    this.gracefulShutdown.shutDownGracefully(callback);
+    //}
+    //
     private void startDaemonAwaitThread(final DisposableServer disposableServer) {
         Thread awaitThread = new Thread("server") {
 
@@ -166,35 +156,35 @@ public class ShenyuNettyWebServer implements WebServer {
         awaitThread.setDaemon(false);
         awaitThread.start();
     }
-
-    @Override
-    public void stop() throws WebServerException {
-        if (this.disposableServer != null) {
-            if (this.gracefulShutdown != null) {
-                this.gracefulShutdown.abort();
-            }
-            try {
-                if (this.lifecycleTimeout != null) {
-                    this.disposableServer.disposeNow(this.lifecycleTimeout);
-                } else {
-                    this.disposableServer.disposeNow();
-                }
-            } catch (IllegalStateException ex) {
-                // Continue
-            }
-            this.disposableServer = null;
-        }
-    }
-
-    @Override
-    public int getPort() {
-        if (this.disposableServer != null) {
-            try {
-                return this.disposableServer.port();
-            } catch (UnsupportedOperationException ex) {
-                return -1;
-            }
-        }
-        return -1;
-    }
+    //
+    //@Override
+    //public void stop() throws WebServerException {
+    //    if (this.disposableServer != null) {
+    //        if (this.gracefulShutdown != null) {
+    //            this.gracefulShutdown.abort();
+    //        }
+    //        try {
+    //            if (this.lifecycleTimeout != null) {
+    //                this.disposableServer.disposeNow(this.lifecycleTimeout);
+    //            } else {
+    //                this.disposableServer.disposeNow();
+    //            }
+    //        } catch (IllegalStateException ex) {
+    //            // Continue
+    //        }
+    //        this.disposableServer = null;
+    //    }
+    //}
+    //
+    //@Override
+    //public int getPort() {
+    //    if (this.disposableServer != null) {
+    //        try {
+    //            return this.disposableServer.port();
+    //        } catch (UnsupportedOperationException ex) {
+    //            return -1;
+    //        }
+    //    }
+    //    return -1;
+    //}
 }

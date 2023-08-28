@@ -22,11 +22,12 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnNotWarDeployment;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.boot.autoconfigure.web.embedded.NettyWebServerFactoryCustomizer;
 import org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFactoryAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.embedded.netty.NettyRouteProvider;
 import org.springframework.boot.web.embedded.netty.NettyServerCustomizer;
-import org.springframework.boot.web.embedded.netty.NettyWebServerFactoryCustomizer;
+//import org.springframework.boot.web.embedded.netty.NettyWebServerFactoryCustomizer;
 import org.springframework.boot.web.embedded.netty.ShenyuNettyReactiveWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -74,7 +75,7 @@ public class ShenyuWebServerConfigurationAutoConfiguration {
          */
         @Bean
         NettyWebServerFactoryCustomizer shenyuNettyWebServerFactoryCustomizer(final Environment environment,
-                                                                                     final ServerProperties serverProperties) {
+                                                                              final ServerProperties serverProperties) {
             return new NettyWebServerFactoryCustomizer(environment, serverProperties);
         }
 

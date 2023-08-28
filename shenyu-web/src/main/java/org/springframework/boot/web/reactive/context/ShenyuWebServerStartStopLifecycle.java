@@ -24,22 +24,22 @@ public class ShenyuWebServerStartStopLifecycle implements SmartLifecycle {
 
     private volatile boolean running;
 
-    private final WebServer webServer;
+    private final ShenyuWebServerManager webServerManager;
 
-    public ShenyuWebServerStartStopLifecycle(final WebServer webServer) {
-        this.webServer = webServer;
+    public ShenyuWebServerStartStopLifecycle(final ShenyuWebServerManager webServerManager) {
+        this.webServerManager = webServerManager;
     }
 
     @Override
     public void start() {
-        this.webServer.start();
+        this.webServerManager.start();
         this.running = true;
     }
 
     @Override
     public void stop() {
         this.running = false;
-        this.webServer.stop();
+        this.webServerManager.stop();
     }
 
     @Override

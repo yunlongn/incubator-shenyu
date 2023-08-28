@@ -1,230 +1,230 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package org.springframework.boot.web.reactive.context;
-
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.BeanNameGenerator;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.boot.ApplicationContextFactory;
-import org.springframework.boot.WebApplicationType;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigRegistry;
-import org.springframework.context.annotation.AnnotationConfigUtils;
-import org.springframework.context.annotation.AnnotationScopeMetadataResolver;
-import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
-import org.springframework.context.annotation.ScopeMetadataResolver;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
-
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
-/**
- * {@link ReactiveWebServerApplicationContext} that accepts annotated classes as input -
- * in particular
- * {@link org.springframework.context.annotation.Configuration @Configuration}-annotated
- * classes, but also plain {@link Component @Component} classes and JSR-330 compliant
- * classes using {@code javax.inject} annotations. Allows for registering classes one by
- * one (specifying class names as config location) as well as for classpath scanning
- * (specifying base packages as config location).
- * Note: In case of multiple {@code @Configuration} classes, later {@code @Bean}
- * definitions will override ones defined in earlier loaded files. This can be leveraged
- * to deliberately override certain bean definitions through an extra Configuration class.
- *
- * @since 2.0.0
- * @see #register(Class...)
- * @see #scan(String...)
- * @see ReactiveWebServerApplicationContext
- * @see AnnotationConfigApplicationContext
- */
-public class ShenyuAnnotationConfigReactiveWebServerApplicationContext extends ShenyuReactiveWebServerApplicationContext
-        implements AnnotationConfigRegistry {
-
-    private final AnnotatedBeanDefinitionReader reader;
-
-    private final ClassPathBeanDefinitionScanner scanner;
-
-    private final Set<Class<?>> annotatedClasses = new LinkedHashSet<>();
-
-    private String[] basePackages;
-
-    /**
-     * Create a new {@link AnnotationConfigReactiveWebServerApplicationContext} that needs
-     * to be populated through {@link #register} calls and then manually
-     * {@linkplain #refresh refreshed}.
-     */
-    public ShenyuAnnotationConfigReactiveWebServerApplicationContext() {
-        this.reader = new AnnotatedBeanDefinitionReader(this);
-        this.scanner = new ClassPathBeanDefinitionScanner(this);
-    }
-
-    /**
-     * Create a new {@link AnnotationConfigReactiveWebServerApplicationContext} with the
-     * given {@code DefaultListableBeanFactory}. The context needs to be populated through
-     * {@link #register} calls and then manually {@linkplain #refresh refreshed}.
-     * @param beanFactory the DefaultListableBeanFactory instance to use for this context
-     */
-    public ShenyuAnnotationConfigReactiveWebServerApplicationContext(final DefaultListableBeanFactory beanFactory) {
-        super(beanFactory);
-        this.reader = new AnnotatedBeanDefinitionReader(this);
-        this.scanner = new ClassPathBeanDefinitionScanner(this);
-    }
-
-    /**
-     * Create a new {@link AnnotationConfigReactiveWebServerApplicationContext}, deriving
-     * bean definitions from the given annotated classes and automatically refreshing the
-     * context.
-     * @param annotatedClasses one or more annotated classes, e.g. {@code @Configuration}
-     */
-    public ShenyuAnnotationConfigReactiveWebServerApplicationContext(final Class<?>... annotatedClasses) {
-        this();
-        register(annotatedClasses);
-        refresh();
-    }
-
-    /**
-     * Create a new {@link AnnotationConfigReactiveWebServerApplicationContext}, scanning
-     * for bean definitions in the given packages and automatically refreshing the
-     * context.
-     * @param basePackages the packages to check for annotated classes
-     */
-    public ShenyuAnnotationConfigReactiveWebServerApplicationContext(final String... basePackages) {
-        this();
-        scan(basePackages);
-        refresh();
-    }
-
-    /**
-     * {@inheritDoc}
-     * Delegates given environment to underlying {@link AnnotatedBeanDefinitionReader} and
-     * {@link ClassPathBeanDefinitionScanner} members.
-     */
-    @Override
-    public void setEnvironment(final ConfigurableEnvironment environment) {
-        super.setEnvironment(environment);
-        this.reader.setEnvironment(environment);
-        this.scanner.setEnvironment(environment);
-    }
-
-    /**
-     * Provide a custom {@link BeanNameGenerator} for use with
-     * {@link AnnotatedBeanDefinitionReader} and/or
-     * {@link ClassPathBeanDefinitionScanner}, if any.
-     * Default is
-     * {@link org.springframework.context.annotation.AnnotationBeanNameGenerator}.
-     * Any call to this method must occur prior to calls to {@link #register(Class...)}
-     * and/or {@link #scan(String...)}.
-     * @param beanNameGenerator the bean name generator
-     * @see AnnotatedBeanDefinitionReader#setBeanNameGenerator
-     * @see ClassPathBeanDefinitionScanner#setBeanNameGenerator
-     */
-    public void setBeanNameGenerator(final BeanNameGenerator beanNameGenerator) {
-        this.reader.setBeanNameGenerator(beanNameGenerator);
-        this.scanner.setBeanNameGenerator(beanNameGenerator);
-        getBeanFactory().registerSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR, beanNameGenerator);
-    }
-
-    /**
-     * Set the {@link ScopeMetadataResolver} to use for detected bean classes.
-     * The default is an {@link AnnotationScopeMetadataResolver}.
-     * Any call to this method must occur prior to calls to {@link #register(Class...)}
-     * and/or {@link #scan(String...)}.
-     * @param scopeMetadataResolver the scope metadata resolver
-     */
-    public void setScopeMetadataResolver(final ScopeMetadataResolver scopeMetadataResolver) {
-        this.reader.setScopeMetadataResolver(scopeMetadataResolver);
-        this.scanner.setScopeMetadataResolver(scopeMetadataResolver);
-    }
-
-    /**
-     * Register one or more annotated classes to be processed. Note that
-     * {@link #refresh()} must be called in order for the context to fully process the new
-     * class.
-     * Calls to {@code #register} are idempotent; adding the same annotated class more
-     * than once has no additional effect.
-     * @param annotatedClasses one or more annotated classes, e.g. {@code @Configuration} classes
-     * @see #scan(String...)
-     * @see #refresh()
-     */
-    @Override
-    public final void register(final Class<?>... annotatedClasses) {
-        Assert.notEmpty(annotatedClasses, "At least one annotated class must be specified");
-        this.annotatedClasses.addAll(Arrays.asList(annotatedClasses));
-    }
-
-    /**
-     * Perform a scan within the specified base packages. Note that {@link #refresh()}
-     * must be called in order for the context to fully process the new class.
-     * @param basePackages the packages to check for annotated classes
-     * @see #register(Class...)
-     * @see #refresh()
-     */
-    @Override
-    public final void scan(final String... basePackages) {
-        Assert.notEmpty(basePackages, "At least one base package must be specified");
-        this.basePackages = basePackages;
-    }
-
-    @Override
-    protected void prepareRefresh() {
-        this.scanner.clearCache();
-        super.prepareRefresh();
-    }
-
-    @Override
-    protected void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory) {
-        super.postProcessBeanFactory(beanFactory);
-        if (!ObjectUtils.isEmpty(this.basePackages)) {
-            this.scanner.scan(this.basePackages);
-        }
-        if (!this.annotatedClasses.isEmpty()) {
-            this.reader.register(ClassUtils.toClassArray(this.annotatedClasses));
-        }
-    }
-
-    /**
-     * {@link ApplicationContextFactory} registered in {@code spring.factories} to support
-     * {@link AnnotationConfigReactiveWebServerApplicationContext}.
-     */
-    public static class Factory implements ApplicationContextFactory {
-
-        @Override
-        public Class<? extends ConfigurableEnvironment> getEnvironmentType(final WebApplicationType webApplicationType) {
-            return (webApplicationType != WebApplicationType.REACTIVE) ? null : ApplicationReactiveWebEnvironment.class;
-        }
-
-        @Override
-        public ConfigurableEnvironment createEnvironment(final WebApplicationType webApplicationType) {
-            return (webApplicationType != WebApplicationType.REACTIVE) ? null : new ApplicationReactiveWebEnvironment();
-        }
-
-        @Override
-        public ConfigurableApplicationContext create(final WebApplicationType webApplicationType) {
-            return (webApplicationType != WebApplicationType.REACTIVE) ? null
-                    : new ShenyuAnnotationConfigReactiveWebServerApplicationContext();
-        }
-
-    }
-
-}
+///*
+// * Licensed to the Apache Software Foundation (ASF) under one or more
+// * contributor license agreements.  See the NOTICE file distributed with
+// * this work for additional information regarding copyright ownership.
+// * The ASF licenses this file to You under the Apache License, Version 2.0
+// * (the "License"); you may not use this file except in compliance with
+// * the License.  You may obtain a copy of the License at
+// *
+// *     http://www.apache.org/licenses/LICENSE-2.0
+// *
+// * Unless required by applicable law or agreed to in writing, software
+// * distributed under the License is distributed on an "AS IS" BASIS,
+// * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// * See the License for the specific language governing permissions and
+// * limitations under the License.
+// */
+//
+//package org.springframework.boot.web.reactive.context;
+//
+//import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+//import org.springframework.beans.factory.support.BeanNameGenerator;
+//import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+//import org.springframework.boot.ApplicationContextFactory;
+//import org.springframework.boot.WebApplicationType;
+//import org.springframework.context.ConfigurableApplicationContext;
+//import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
+//import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+//import org.springframework.context.annotation.AnnotationConfigRegistry;
+//import org.springframework.context.annotation.AnnotationConfigUtils;
+//import org.springframework.context.annotation.AnnotationScopeMetadataResolver;
+//import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
+//import org.springframework.context.annotation.ScopeMetadataResolver;
+//import org.springframework.core.env.ConfigurableEnvironment;
+//import org.springframework.stereotype.Component;
+//import org.springframework.util.Assert;
+//import org.springframework.util.ClassUtils;
+//import org.springframework.util.ObjectUtils;
+//
+//import java.util.Arrays;
+//import java.util.LinkedHashSet;
+//import java.util.Set;
+//
+///**
+// * {@link ReactiveWebServerApplicationContext} that accepts annotated classes as input -
+// * in particular
+// * {@link org.springframework.context.annotation.Configuration @Configuration}-annotated
+// * classes, but also plain {@link Component @Component} classes and JSR-330 compliant
+// * classes using {@code javax.inject} annotations. Allows for registering classes one by
+// * one (specifying class names as config location) as well as for classpath scanning
+// * (specifying base packages as config location).
+// * Note: In case of multiple {@code @Configuration} classes, later {@code @Bean}
+// * definitions will override ones defined in earlier loaded files. This can be leveraged
+// * to deliberately override certain bean definitions through an extra Configuration class.
+// *
+// * @since 2.0.0
+// * @see #register(Class...)
+// * @see #scan(String...)
+// * @see ReactiveWebServerApplicationContext
+// * @see AnnotationConfigApplicationContext
+// */
+//public class ShenyuAnnotationConfigReactiveWebServerApplicationContext extends ShenyuReactiveWebServerApplicationContext
+//        implements AnnotationConfigRegistry {
+//
+//    private final AnnotatedBeanDefinitionReader reader;
+//
+//    private final ClassPathBeanDefinitionScanner scanner;
+//
+//    private final Set<Class<?>> annotatedClasses = new LinkedHashSet<>();
+//
+//    private String[] basePackages;
+//
+//    /**
+//     * Create a new {@link AnnotationConfigReactiveWebServerApplicationContext} that needs
+//     * to be populated through {@link #register} calls and then manually
+//     * {@linkplain #refresh refreshed}.
+//     */
+//    public ShenyuAnnotationConfigReactiveWebServerApplicationContext() {
+//        this.reader = new AnnotatedBeanDefinitionReader(this);
+//        this.scanner = new ClassPathBeanDefinitionScanner(this);
+//    }
+//
+//    /**
+//     * Create a new {@link AnnotationConfigReactiveWebServerApplicationContext} with the
+//     * given {@code DefaultListableBeanFactory}. The context needs to be populated through
+//     * {@link #register} calls and then manually {@linkplain #refresh refreshed}.
+//     * @param beanFactory the DefaultListableBeanFactory instance to use for this context
+//     */
+//    public ShenyuAnnotationConfigReactiveWebServerApplicationContext(final DefaultListableBeanFactory beanFactory) {
+//        super(beanFactory);
+//        this.reader = new AnnotatedBeanDefinitionReader(this);
+//        this.scanner = new ClassPathBeanDefinitionScanner(this);
+//    }
+//
+//    /**
+//     * Create a new {@link AnnotationConfigReactiveWebServerApplicationContext}, deriving
+//     * bean definitions from the given annotated classes and automatically refreshing the
+//     * context.
+//     * @param annotatedClasses one or more annotated classes, e.g. {@code @Configuration}
+//     */
+//    public ShenyuAnnotationConfigReactiveWebServerApplicationContext(final Class<?>... annotatedClasses) {
+//        this();
+//        register(annotatedClasses);
+//        refresh();
+//    }
+//
+//    /**
+//     * Create a new {@link AnnotationConfigReactiveWebServerApplicationContext}, scanning
+//     * for bean definitions in the given packages and automatically refreshing the
+//     * context.
+//     * @param basePackages the packages to check for annotated classes
+//     */
+//    public ShenyuAnnotationConfigReactiveWebServerApplicationContext(final String... basePackages) {
+//        this();
+//        scan(basePackages);
+//        refresh();
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     * Delegates given environment to underlying {@link AnnotatedBeanDefinitionReader} and
+//     * {@link ClassPathBeanDefinitionScanner} members.
+//     */
+//    @Override
+//    public void setEnvironment(final ConfigurableEnvironment environment) {
+//        super.setEnvironment(environment);
+//        this.reader.setEnvironment(environment);
+//        this.scanner.setEnvironment(environment);
+//    }
+//
+//    /**
+//     * Provide a custom {@link BeanNameGenerator} for use with
+//     * {@link AnnotatedBeanDefinitionReader} and/or
+//     * {@link ClassPathBeanDefinitionScanner}, if any.
+//     * Default is
+//     * {@link org.springframework.context.annotation.AnnotationBeanNameGenerator}.
+//     * Any call to this method must occur prior to calls to {@link #register(Class...)}
+//     * and/or {@link #scan(String...)}.
+//     * @param beanNameGenerator the bean name generator
+//     * @see AnnotatedBeanDefinitionReader#setBeanNameGenerator
+//     * @see ClassPathBeanDefinitionScanner#setBeanNameGenerator
+//     */
+//    public void setBeanNameGenerator(final BeanNameGenerator beanNameGenerator) {
+//        this.reader.setBeanNameGenerator(beanNameGenerator);
+//        this.scanner.setBeanNameGenerator(beanNameGenerator);
+//        getBeanFactory().registerSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR, beanNameGenerator);
+//    }
+//
+//    /**
+//     * Set the {@link ScopeMetadataResolver} to use for detected bean classes.
+//     * The default is an {@link AnnotationScopeMetadataResolver}.
+//     * Any call to this method must occur prior to calls to {@link #register(Class...)}
+//     * and/or {@link #scan(String...)}.
+//     * @param scopeMetadataResolver the scope metadata resolver
+//     */
+//    public void setScopeMetadataResolver(final ScopeMetadataResolver scopeMetadataResolver) {
+//        this.reader.setScopeMetadataResolver(scopeMetadataResolver);
+//        this.scanner.setScopeMetadataResolver(scopeMetadataResolver);
+//    }
+//
+//    /**
+//     * Register one or more annotated classes to be processed. Note that
+//     * {@link #refresh()} must be called in order for the context to fully process the new
+//     * class.
+//     * Calls to {@code #register} are idempotent; adding the same annotated class more
+//     * than once has no additional effect.
+//     * @param annotatedClasses one or more annotated classes, e.g. {@code @Configuration} classes
+//     * @see #scan(String...)
+//     * @see #refresh()
+//     */
+//    @Override
+//    public final void register(final Class<?>... annotatedClasses) {
+//        Assert.notEmpty(annotatedClasses, "At least one annotated class must be specified");
+//        this.annotatedClasses.addAll(Arrays.asList(annotatedClasses));
+//    }
+//
+//    /**
+//     * Perform a scan within the specified base packages. Note that {@link #refresh()}
+//     * must be called in order for the context to fully process the new class.
+//     * @param basePackages the packages to check for annotated classes
+//     * @see #register(Class...)
+//     * @see #refresh()
+//     */
+//    @Override
+//    public final void scan(final String... basePackages) {
+//        Assert.notEmpty(basePackages, "At least one base package must be specified");
+//        this.basePackages = basePackages;
+//    }
+//
+//    @Override
+//    protected void prepareRefresh() {
+//        this.scanner.clearCache();
+//        super.prepareRefresh();
+//    }
+//
+//    @Override
+//    protected void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory) {
+//        super.postProcessBeanFactory(beanFactory);
+//        if (!ObjectUtils.isEmpty(this.basePackages)) {
+//            this.scanner.scan(this.basePackages);
+//        }
+//        if (!this.annotatedClasses.isEmpty()) {
+//            this.reader.register(ClassUtils.toClassArray(this.annotatedClasses));
+//        }
+//    }
+//
+//    /**
+//     * {@link ApplicationContextFactory} registered in {@code spring.factories} to support
+//     * {@link AnnotationConfigReactiveWebServerApplicationContext}.
+//     */
+//    public static class Factory implements ApplicationContextFactory {
+//
+//        @Override
+//        public Class<? extends ConfigurableEnvironment> getEnvironmentType(final WebApplicationType webApplicationType) {
+//            return (webApplicationType != WebApplicationType.REACTIVE) ? null : ApplicationReactiveWebEnvironment.class;
+//        }
+//
+//        @Override
+//        public ConfigurableEnvironment createEnvironment(final WebApplicationType webApplicationType) {
+//            return (webApplicationType != WebApplicationType.REACTIVE) ? null : new ApplicationReactiveWebEnvironment();
+//        }
+//
+//        @Override
+//        public ConfigurableApplicationContext create(final WebApplicationType webApplicationType) {
+//            return (webApplicationType != WebApplicationType.REACTIVE) ? null
+//                    : new ShenyuAnnotationConfigReactiveWebServerApplicationContext();
+//        }
+//
+//    }
+//
+//}
