@@ -36,13 +36,13 @@ public class ShenyuAdapterAnnotationConfigReactiveWebServerApplicationContext ex
             final ShenyuNettyReactiveWebServerFactory nettyReactiveWebServerFactory = getBeanFactory().getBean(ShenyuNettyReactiveWebServerFactory.class);
             createWebServer.tag("factory", nettyReactiveWebServerFactory.getClass().toString());
             
-            boolean lazyInit = getBeanFactory().getBeanDefinition(webServerFactoryBeanName).isLazyInit();
-            this.serverManager = new ShenyuWebServerManager(this, nettyReactiveWebServerFactory, this::getHttpHandler, lazyInit);
-            //webServer = nettyReactiveWebServerFactory.getWebServer();
+            //boolean lazyInit = getBeanFactory().getBeanDefinition(webServerFactoryBeanName).isLazyInit();
+            //this.serverManager = new ShenyuWebServerManager(this, nettyReactiveWebServerFactory, this::getHttpHandler, lazyInit);
+            webServer = nettyReactiveWebServerFactory.getWebServer(getHttpHandler());
             getBeanFactory().registerSingleton("webServerGracefulShutdown",
                     new WebServerGracefulShutdownLifecycle(webServer));
             getBeanFactory().registerSingleton("webServerStartStop",
-                    new ShenyuWebServerStartStopLifecycle(this.serverManager));
+                    new ShenyuWebServerStartStopLifecycle(webServer));
             createWebServer.end();
         }
         initPropertySources();

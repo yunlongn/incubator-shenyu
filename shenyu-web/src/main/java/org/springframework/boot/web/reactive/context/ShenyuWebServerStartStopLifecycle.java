@@ -23,23 +23,23 @@ import org.springframework.context.SmartLifecycle;
 public class ShenyuWebServerStartStopLifecycle implements SmartLifecycle {
 
     private volatile boolean running;
-
-    private final ShenyuWebServerManager webServerManager;
-
-    public ShenyuWebServerStartStopLifecycle(final ShenyuWebServerManager webServerManager) {
-        this.webServerManager = webServerManager;
+    
+    private final WebServer webServer;
+    
+    public ShenyuWebServerStartStopLifecycle(final WebServer webServer) {
+        this.webServer = webServer;
     }
-
+    
     @Override
     public void start() {
-        this.webServerManager.start();
+        this.webServer.start();
         this.running = true;
     }
-
+    
     @Override
     public void stop() {
         this.running = false;
-        this.webServerManager.stop();
+        this.webServer.stop();
     }
 
     @Override
