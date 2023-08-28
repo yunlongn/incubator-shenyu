@@ -14,8 +14,6 @@ import org.springframework.http.server.reactive.HttpHandler;
 
 public class ShenyuAdapterAnnotationConfigReactiveWebServerApplicationContext extends AnnotationConfigReactiveWebServerApplicationContext {
     
-    private volatile ShenyuWebServerManager serverManager;
-    
     private WebServer webServer;
     
     @Override
@@ -28,8 +26,7 @@ public class ShenyuAdapterAnnotationConfigReactiveWebServerApplicationContext ex
     }
     
     private void createWebServer() {
-        ShenyuWebServerManager serverManager = this.serverManager;
-        if (serverManager == null) {
+        if (webServer == null) {
             StartupStep createWebServer = this.getApplicationStartup().start("spring.boot.webserver.create");
             String webServerFactoryBeanName = getWebServerFactoryBeanName();
             
