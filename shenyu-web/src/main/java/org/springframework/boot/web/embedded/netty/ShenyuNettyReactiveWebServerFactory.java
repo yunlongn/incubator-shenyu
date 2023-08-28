@@ -21,12 +21,14 @@ import org.springframework.boot.web.server.Shutdown;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ShenyuReactorHttpHandlerAdapter;
+import org.springframework.util.Assert;
 import reactor.netty.http.HttpProtocol;
 import reactor.netty.http.server.HttpServer;
 
 import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -131,5 +133,34 @@ public class ShenyuNettyReactiveWebServerFactory extends NettyReactiveWebServerF
      */
     public void setUseForwardHeaders(final boolean useForwardHeaders) {
         this.useForwardHeaders = useForwardHeaders;
+    }
+
+    @Override
+    public void setShutdown(final Shutdown shutdown) {
+        this.shutdown = shutdown;
+    }
+
+    @Override
+    public Shutdown getShutdown() {
+        return this.shutdown;
+    }
+
+    /**
+     * Returns a mutable collection of the {@link NettyServerCustomizer}s that will be
+     * applied to the Netty server builder.
+     * @return the customizers that will be applied
+     */
+    public Collection<NettyServerCustomizer> getServerCustomizers() {
+        return this.serverCustomizers;
+    }
+
+    /**
+     * Set {@link NettyServerCustomizer}s that should be applied to the Netty server
+     * builder. Calling this method will replace any existing customizers.
+     * @param serverCustomizers the customizers to set
+     */
+    public void setServerCustomizers(final Collection<? extends NettyServerCustomizer> serverCustomizers) {
+        Assert.notNull(serverCustomizers, "ServerCustomizers must not be null");
+        this.serverCustomizers = new LinkedHashSet<>(serverCustomizers);
     }
 }
