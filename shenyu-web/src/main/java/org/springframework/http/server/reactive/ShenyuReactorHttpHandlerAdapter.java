@@ -61,6 +61,7 @@ public class ShenyuReactorHttpHandlerAdapter extends ReactorHttpHandlerAdapter i
     public Mono<Void> apply(final HttpServerRequest reactorRequest, final HttpServerResponse reactorResponse) {
         //DefaultServerWebExchange exchange = new DefaultServerWebExchange(reactorRequest, reactorResponse);
         ShenyuServerExchange exchange = new ShenyuServerExchange(reactorRequest, reactorResponse, httpHandler);
+        LOGGER.info("receive request...");
         shenyuRequestEventPublisher.publishEvent(exchange);
         //new Thread(() -> {
         //    NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(reactorResponse.alloc());

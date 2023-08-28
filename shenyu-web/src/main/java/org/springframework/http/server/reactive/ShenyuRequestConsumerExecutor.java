@@ -23,6 +23,7 @@ public class ShenyuRequestConsumerExecutor<T extends ShenyuServerExchange> exten
         ShenyuServerExchange exchange = data;
         
         new Thread(() -> {
+            LOGGER.info("handle request...");
             HttpServerRequest reactorRequest = exchange.getReactorRequest();
             HttpServerResponse reactorResponse = exchange.getReactorResponse();
             HttpHandler httpHandler = exchange.getHttpHandler();
