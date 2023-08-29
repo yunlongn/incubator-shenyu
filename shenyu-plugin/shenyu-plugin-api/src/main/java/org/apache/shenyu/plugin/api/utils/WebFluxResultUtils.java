@@ -53,6 +53,7 @@ public final class WebFluxResultUtils {
      * @return the result
      */
     public static Mono<Void> result(final ServerWebExchange exchange, final Object result) {
+        // add mono attribute. Used at `ShenyuHttpWebHandlerAdapter#sendResponse` location
         exchange.getAttributes().put(Constants.RESPONSE_WRITE_WITH,
                 result0(exchange, result).then(Mono.defer(exchange.getResponse()::setComplete)));
         return Mono.empty();

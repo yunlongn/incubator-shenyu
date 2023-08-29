@@ -54,11 +54,11 @@ public class ShenyuHttpWebHandlerAdapter extends HttpWebHandlerAdapter {
                         + (traceOn ? ", headers=" + exchange.getResponse().getHeaders() : ""));
 
         return getDelegate().handle(exchange)
-                .doOnSuccess(aVoid -> logResponse(exchange))
+                .doOnSuccess(aVoid -> sendResponse(exchange))
                 .onErrorResume(ex -> handleUnresolvedError(exchange, ex));
     }
 
-    private void logResponse(final ServerWebExchange exchange) {
+    private void sendResponse(final ServerWebExchange exchange) {
         shenyuResponseEventPublisher.publishEvent(exchange.getAttribute(Constants.RESPONSE_WRITE_WITH));
         LogFormatUtils.traceDebug(LOGGER, traceOn -> {
             HttpStatus status = exchange.getResponse().getStatusCode();
