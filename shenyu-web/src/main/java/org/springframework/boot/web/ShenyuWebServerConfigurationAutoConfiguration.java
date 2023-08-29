@@ -26,10 +26,19 @@ import org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFact
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.embedded.netty.NettyServerCustomizer;
 import org.springframework.boot.web.embedded.netty.ShenyuNettyReactiveWebServerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.adapter.ShenyuHttpWebHandlerAdapter;
+import org.springframework.web.server.handler.FilteringWebHandler;
 
+import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.springframework.web.server.adapter.WebHttpHandlerBuilder.WEB_HANDLER_BEAN_NAME;
 
 @AutoConfiguration
 @ConditionalOnNotWarDeployment
@@ -50,5 +59,14 @@ public class ShenyuWebServerConfigurationAutoConfiguration {
         ShenyuNettyReactiveWebServerFactory serverFactory = new ShenyuNettyReactiveWebServerFactory();
         serverFactory.getServerCustomizers().addAll(serverCustomizers.orderedStream().collect(Collectors.toList()));
         return serverFactory;
+    }
+
+    @Bean
+    HttpHandler httpHandler(final ApplicationContext applicationContext) {
+        final WebHandler webHandler = applicationContext.getBean(WEB_HANDLER_BEAN_NAME, WebHandler.class);
+        List<WebFilter> webFilters = applicationContext.getBeanProvider(WebFilter.class)
+                .orderedStream().collect(Collectors.toList());
+        WebHandler decorated = new FilteringWebHandler(webHandler, webFilters);
+        return new ShenyuHttpWebHandlerAdapter(decorated);
     }
 }

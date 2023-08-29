@@ -10,7 +10,6 @@ import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.metrics.StartupStep;
-import org.springframework.http.server.reactive.HttpHandler;
 
 public class ShenyuAdapterAnnotationConfigReactiveWebServerApplicationContext extends AnnotationConfigReactiveWebServerApplicationContext {
     
@@ -35,7 +34,7 @@ public class ShenyuAdapterAnnotationConfigReactiveWebServerApplicationContext ex
             
             //boolean lazyInit = getBeanFactory().getBeanDefinition(webServerFactoryBeanName).isLazyInit();
             //this.serverManager = new ShenyuWebServerManager(this, nettyReactiveWebServerFactory, this::getHttpHandler, lazyInit);
-            webServer = nettyReactiveWebServerFactory.getWebServer(getHttpHandler());
+            webServer = nettyReactiveWebServerFactory.getWebServer(super.getHttpHandler());
             getBeanFactory().registerSingleton("webServerGracefulShutdown",
                     new WebServerGracefulShutdownLifecycle(webServer));
             getBeanFactory().registerSingleton("webServerStartStop",
@@ -53,11 +52,6 @@ public class ShenyuAdapterAnnotationConfigReactiveWebServerApplicationContext ex
     @Override
     protected ReactiveWebServerFactory getWebServerFactory(final String factoryBeanName) {
         return super.getWebServerFactory(factoryBeanName);
-    }
-    
-    @Override
-    protected HttpHandler getHttpHandler() {
-        return super.getHttpHandler();
     }
     
     @Override
