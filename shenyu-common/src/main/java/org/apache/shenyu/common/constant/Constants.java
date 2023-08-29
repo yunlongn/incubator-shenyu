@@ -156,6 +156,11 @@ public interface Constants {
      * RESPONSE_MONO.
      */
     String RESPONSE_MONO = "RESPONSE_MONO";
+
+    /**
+     * RESPONSE_WRITE_WITH.
+     */
+    String RESPONSE_WRITE_WITH = "RESPONSE_WRITE_WITH";
     
     /**
      * WATCHER_HTTP_STATUS.

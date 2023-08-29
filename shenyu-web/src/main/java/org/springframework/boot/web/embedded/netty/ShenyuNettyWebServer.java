@@ -40,7 +40,6 @@ import reactor.netty.http.server.ShenyuHttpServerHandle;
 
 import java.time.Duration;
 import java.util.function.BiFunction;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -56,8 +55,6 @@ public class ShenyuNettyWebServer extends NettyWebServer {
      * Permission denied error code from {@code errno.h}.
      */
     private static final int ERROR_NO_EACCES = -13;
-
-    private static final Predicate<HttpServerRequest> ALWAYS = request -> true;
 
     private static final Log LOGGER = LogFactory.getLog(ShenyuNettyWebServer.class);
 

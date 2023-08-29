@@ -17,6 +17,7 @@
 
 package org.apache.shenyu.plugin.api.utils;
 
+import org.apache.shenyu.common.constant.Constants;
 import org.apache.shenyu.common.utils.ObjectTypeUtils;
 import org.apache.shenyu.plugin.api.exception.ResponsiveException;
 import org.apache.shenyu.plugin.api.result.ShenyuResult;
@@ -52,6 +53,19 @@ public final class WebFluxResultUtils {
      * @return the result
      */
     public static Mono<Void> result(final ServerWebExchange exchange, final Object result) {
+        exchange.getAttributes().put(Constants.RESPONSE_WRITE_WITH,
+                result0(exchange, result).then(Mono.defer(exchange.getResponse()::setComplete)));
+        return Mono.empty();
+    }
+
+    /**
+     * Response result.
+     *
+     * @param exchange the exchange
+     * @param result   the result
+     * @return the result
+     */
+    public static Mono<Void> result0(final ServerWebExchange exchange, final Object result) {
         if (Objects.isNull(result)) {
             return Mono.empty();
         }
