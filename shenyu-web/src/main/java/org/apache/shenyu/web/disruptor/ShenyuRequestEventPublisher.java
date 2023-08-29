@@ -28,7 +28,7 @@ public class ShenyuRequestEventPublisher {
      * @param shenyuDisruptorConfig config
      */
     public void start(final ShenyuDisruptorConfig shenyuDisruptorConfig) {
-        ShenyuRequestConsumerExecutorFactory factory = new ShenyuRequestConsumerExecutorFactory();
+        ShenyuRequestConsumerExecutorFactory<ShenyuServerExchange> factory = new ShenyuRequestConsumerExecutorFactory<>();
         providerManage = new DisruptorProviderManage<>(factory, shenyuDisruptorConfig.getThreadSize(), shenyuDisruptorConfig.getBufferSize());
         providerManage.startup();
     }
