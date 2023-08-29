@@ -2,6 +2,8 @@ package org.springframework.web.server.adapter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.shenyu.common.constant.Constants;
+import org.apache.shenyu.web.disruptor.ShenyuResponseEventPublisher;
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpStatus;
@@ -37,6 +39,8 @@ public class ShenyuHttpWebHandlerAdapter extends HttpWebHandlerAdapter {
 
     private static final Log LOST_CLIENT_LOGGER = LogFactory.getLog(DISCONNECTED_CLIENT_LOG_CATEGORY);
 
+    private final ShenyuResponseEventPublisher shenyuResponseEventPublisher = ShenyuResponseEventPublisher.getInstance();
+
     public ShenyuHttpWebHandlerAdapter(final WebHandler delegate) {
         super(delegate);
     }
@@ -51,11 +55,11 @@ public class ShenyuHttpWebHandlerAdapter extends HttpWebHandlerAdapter {
 
         return getDelegate().handle(exchange)
                 .doOnSuccess(aVoid -> logResponse(exchange))
-                .onErrorResume(ex -> handleUnresolvedError(exchange, ex))
-                .then(Mono.defer(response::setComplete));
+                .onErrorResume(ex -> handleUnresolvedError(exchange, ex));
     }
 
     private void logResponse(final ServerWebExchange exchange) {
+        shenyuResponseEventPublisher.publishEvent(exchange.getAttribute(Constants.RESPONSE_WRITE_WITH));
         LogFormatUtils.traceDebug(LOGGER, traceOn -> {
             HttpStatus status = exchange.getResponse().getStatusCode();
             return exchange.getLogPrefix() + "Completed " + (status != null ? status : "200 OK")
