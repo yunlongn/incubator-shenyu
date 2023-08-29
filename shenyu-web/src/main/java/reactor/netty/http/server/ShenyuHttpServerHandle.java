@@ -17,7 +17,6 @@
 
 package reactor.netty.http.server;
 
-import io.netty.buffer.Unpooled;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.netty.Connection;

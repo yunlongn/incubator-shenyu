@@ -68,6 +68,8 @@ public class ShenyuConfig {
     
     private SpringCloudCacheConfig springCloudCache = new SpringCloudCacheConfig();
     
+    private ShenyuWorkThreadPoolConfig shenyuWorkThreadPool = new ShenyuWorkThreadPoolConfig();
+    
     /**
      * Gets health.
      *
@@ -372,6 +374,24 @@ public class ShenyuConfig {
      */
     public void setSpringCloudCache(final SpringCloudCacheConfig springCloudCache) {
         this.springCloudCache = springCloudCache;
+    }
+    
+    /**
+     * Get the shenyu work thread pool config.
+     *
+     * @return the shenyu work thread pool config
+     */
+    public ShenyuWorkThreadPoolConfig getShenyuWorkThreadPool() {
+        return shenyuWorkThreadPool;
+    }
+    
+    /**
+     * set the shenyu work thread pool config.
+     *
+     * @param shenyuWorkThreadPool the shenyu work thread pool config
+     */
+    public void setShenyuWorkThreadPool(final ShenyuWorkThreadPoolConfig shenyuWorkThreadPool) {
+        this.shenyuWorkThreadPool = shenyuWorkThreadPool;
     }
     
     /**
