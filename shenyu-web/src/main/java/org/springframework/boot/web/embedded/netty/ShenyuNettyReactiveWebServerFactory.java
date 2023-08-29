@@ -26,7 +26,6 @@ import reactor.netty.http.HttpProtocol;
 import reactor.netty.http.server.HttpServer;
 
 import java.net.InetSocketAddress;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -42,20 +41,12 @@ public class ShenyuNettyReactiveWebServerFactory extends NettyReactiveWebServerF
 
     private Set<NettyServerCustomizer> serverCustomizers = new LinkedHashSet<>();
 
-    private List<NettyRouteProvider> routeProviders = new ArrayList<>();
-
-    private Duration lifecycleTimeout;
-
     private boolean useForwardHeaders;
     
     private Shutdown shutdown;
 
     public ShenyuNettyReactiveWebServerFactory() {
         serverCustomizers = (Set<NettyServerCustomizer>) getServerCustomizers();
-    }
-
-    public ShenyuNettyReactiveWebServerFactory(final int port) {
-        super(port);
     }
 
     /**
@@ -68,15 +59,12 @@ public class ShenyuNettyReactiveWebServerFactory extends NettyReactiveWebServerF
     public WebServer getWebServer(final HttpHandler httpHandler) {
         HttpServer httpServer = createHttpServer();
         ShenyuReactorHttpHandlerAdapter handlerAdapter = new ShenyuReactorHttpHandlerAdapter(httpHandler);
-        ShenyuNettyWebServer webServer = createShenyuNettyWebServer(httpServer, handlerAdapter, this.lifecycleTimeout,
-                getShutdown());
-        webServer.setRouteProviders(this.routeProviders);
-        return webServer;
+        return createShenyuNettyWebServer(httpServer, handlerAdapter, getShutdown());
     }
 
     ShenyuNettyWebServer createShenyuNettyWebServer(final HttpServer httpServer, final ShenyuReactorHttpHandlerAdapter handlerAdapter,
-                                                    final Duration lifecycleTimeout, final Shutdown shutdown) {
-        return new ShenyuNettyWebServer(httpServer, handlerAdapter, lifecycleTimeout, shutdown);
+                                                    final Shutdown shutdown) {
+        return new ShenyuNettyWebServer(httpServer, handlerAdapter, null, shutdown);
     }
 
     private HttpServer createHttpServer() {

@@ -22,17 +22,12 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnNotWarDeployment;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
-import org.springframework.boot.autoconfigure.web.embedded.NettyWebServerFactoryCustomizer;
 import org.springframework.boot.autoconfigure.web.reactive.ReactiveWebServerFactoryAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.embedded.netty.NettyRouteProvider;
 import org.springframework.boot.web.embedded.netty.NettyServerCustomizer;
-//import org.springframework.boot.web.embedded.netty.NettyWebServerFactoryCustomizer;
 import org.springframework.boot.web.embedded.netty.ShenyuNettyReactiveWebServerFactory;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 
 import java.util.stream.Collectors;
 
@@ -47,37 +42,13 @@ public class ShenyuWebServerConfigurationAutoConfiguration {
     /**
      * nettyReactiveWebServerFactory.
      *
-     * @param routes routes
      * @param serverCustomizers serverCustomizers
      * @return {@link ShenyuNettyReactiveWebServerFactory}
      */
     @Bean
-    ShenyuNettyReactiveWebServerFactory nettyReactiveWebServerFactory(final ObjectProvider<NettyRouteProvider> routes,
-                                                                      final ObjectProvider<NettyServerCustomizer> serverCustomizers) {
+    ShenyuNettyReactiveWebServerFactory nettyReactiveWebServerFactory(final ObjectProvider<NettyServerCustomizer> serverCustomizers) {
         ShenyuNettyReactiveWebServerFactory serverFactory = new ShenyuNettyReactiveWebServerFactory();
-        routes.orderedStream().forEach(serverFactory::addRouteProviders);
         serverFactory.getServerCustomizers().addAll(serverCustomizers.orderedStream().collect(Collectors.toList()));
         return serverFactory;
-    }
-
-    /**
-     * Nested configuration if Netty is being used.
-     */
-    @Configuration(proxyBeanMethods = false)
-    public static class ShenyuNettyWebServerFactoryCustomizerConfiguration {
-
-        /**
-         * shenyuNettyWebServerFactoryCustomizer.
-         *
-         * @param environment environment
-         * @param serverProperties serverProperties
-         * @return {@link NettyWebServerFactoryCustomizer}
-         */
-        @Bean
-        NettyWebServerFactoryCustomizer shenyuNettyWebServerFactoryCustomizer(final Environment environment,
-                                                                              final ServerProperties serverProperties) {
-            return new NettyWebServerFactoryCustomizer(environment, serverProperties);
-        }
-
     }
 }
