@@ -40,7 +40,7 @@ public class ShenyuRequestConsumerExecutor<T extends ShenyuRequestExchange> exte
         LOGGER.info("get request...");
         new Thread(() -> {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(6000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
