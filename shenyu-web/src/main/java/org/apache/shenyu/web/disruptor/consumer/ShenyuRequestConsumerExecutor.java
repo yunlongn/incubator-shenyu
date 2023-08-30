@@ -41,18 +41,11 @@ public class ShenyuRequestConsumerExecutor<T extends ShenyuRequestExchange> exte
     public void run() {
         final ShenyuRequestExchange shenyuRequestExchange = getData();
         LOGGER.info("get request...");
-        new Thread(() -> {
-            try {
-                Thread.sleep(6000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            final ServerWebExchange requestExchangeExchange = shenyuRequestExchange.getExchange();
-            requestExchangeExchange.getAttributes().put(RESPONSE_HANDLER_SEND_DISRUPTOR_WATCH,
-                    (Consumer<Mono>) shenyuResponseEventPublisher::publishEvent);
-            Mono<Void> execute = new ShenyuWebHandler.DefaultShenyuPluginChain(shenyuRequestExchange.getPlugins()).execute(shenyuRequestExchange.getExchange());
-            execute.subscribe();
-        }).start();
+        final ServerWebExchange requestExchangeExchange = shenyuRequestExchange.getExchange();
+        requestExchangeExchange.getAttributes().put(RESPONSE_HANDLER_SEND_DISRUPTOR_WATCH,
+                (Consumer<Mono<Void>>) shenyuResponseEventPublisher::publishEvent);
+        Mono<Void> execute = new ShenyuWebHandler.DefaultShenyuPluginChain(shenyuRequestExchange.getPlugins()).execute(shenyuRequestExchange.getExchange());
+        execute.subscribe();
     }
     
     public static class ShenyuRequestConsumerExecutorFactory<T extends ShenyuRequestExchange> implements QueueConsumerFactory<T> {
