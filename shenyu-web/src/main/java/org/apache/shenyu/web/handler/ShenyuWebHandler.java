@@ -28,6 +28,7 @@ import org.apache.shenyu.plugin.base.cache.BaseDataCache;
 import org.apache.shenyu.plugin.base.cache.PluginHandlerEvent;
 import org.apache.shenyu.web.disruptor.ShenyuRequestEventPublisher;
 import org.apache.shenyu.web.loader.ShenyuLoaderService;
+import org.apache.shenyu.web.server.ShenyuRequestExchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
@@ -101,11 +102,8 @@ public final class ShenyuWebHandler implements WebHandler, ApplicationListener<P
      */
     @Override
     public Mono<Void> handle(@NonNull final ServerWebExchange exchange) {
-        Mono<Void> execute = new DefaultShenyuPluginChain(plugins).execute(exchange);
-        if (scheduled) {
-            return execute.subscribeOn(scheduler);
-        }
-        shenyuRequestEventPublisher.publishEvent(execute);
+
+        shenyuRequestEventPublisher.publishEvent(new ShenyuRequestExchange(exchange, plugins));
         return Mono.never();
     }
     
@@ -232,7 +230,7 @@ public final class ShenyuWebHandler implements WebHandler, ApplicationListener<P
         this.plugins = newPluginList;
     }
 
-    private static class DefaultShenyuPluginChain implements ShenyuPluginChain {
+    public static class DefaultShenyuPluginChain implements ShenyuPluginChain {
 
         private int index;
 
@@ -243,7 +241,7 @@ public final class ShenyuWebHandler implements WebHandler, ApplicationListener<P
          *
          * @param plugins the plugins
          */
-        DefaultShenyuPluginChain(final List<ShenyuPlugin> plugins) {
+        public DefaultShenyuPluginChain(final List<ShenyuPlugin> plugins) {
             this.plugins = plugins;
         }
 

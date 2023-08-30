@@ -18,29 +18,42 @@
 package org.apache.shenyu.web.disruptor.consumer;
 
 import org.apache.commons.logging.Log;
+import org.apache.shenyu.common.constant.Constants;
 import org.apache.shenyu.disruptor.consumer.QueueConsumerExecutor;
 import org.apache.shenyu.disruptor.consumer.QueueConsumerFactory;
+import org.apache.shenyu.web.disruptor.ShenyuResponseEventPublisher;
+import org.apache.shenyu.web.handler.ShenyuWebHandler;
+import org.apache.shenyu.web.server.ShenyuRequestExchange;
 import org.springframework.http.HttpLogging;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-public class ShenyuRequestConsumerExecutor<T extends Mono> extends QueueConsumerExecutor<T> {
+public class ShenyuRequestConsumerExecutor<T extends ShenyuRequestExchange> extends QueueConsumerExecutor<T> {
     
     private static final Log LOGGER = HttpLogging.forLogName(ShenyuRequestConsumerExecutor.class);
+
+    private ShenyuResponseEventPublisher shenyuResponseEventPublisher = ShenyuResponseEventPublisher.getInstance();
     
     @Override
     public void run() {
-        LOGGER.info("get request...");
+        LOGGER.info("send request...");
+        final ShenyuRequestExchange shenyuRequestExchange = getData();
         new Thread(() -> {
             try {
                 Thread.sleep(3000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            getData().subscribe();
+            Mono<Void> execute = new ShenyuWebHandler.DefaultShenyuPluginChain(shenyuRequestExchange.getPlugins()).execute(shenyuRequestExchange.getExchange());
+            execute.doOnSubscribe(s -> {
+                final ServerWebExchange requestExchangeExchange = shenyuRequestExchange.getExchange();
+                final Mono responstWriteWithMono = requestExchangeExchange.getAttribute(Constants.RESPONSE_WRITE_WITH_MONO);
+                shenyuResponseEventPublisher.publishEvent(responstWriteWithMono);
+            }).subscribe();
         }).start();
     }
     
-    public static class ShenyuRequestConsumerExecutorFactory<T extends Mono> implements QueueConsumerFactory<T> {
+    public static class ShenyuRequestConsumerExecutorFactory<T extends ShenyuRequestExchange> implements QueueConsumerFactory<T> {
         @Override
         public ShenyuRequestConsumerExecutor<T> create() {
             

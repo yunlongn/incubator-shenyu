@@ -17,6 +17,7 @@
 
 package org.apache.shenyu.plugin.api.utils;
 
+import org.apache.shenyu.common.constant.Constants;
 import org.apache.shenyu.common.utils.ObjectTypeUtils;
 import org.apache.shenyu.plugin.api.exception.ResponsiveException;
 import org.apache.shenyu.plugin.api.result.ShenyuResult;
@@ -53,8 +54,9 @@ public final class WebFluxResultUtils {
      */
     public static Mono<Void> result(final ServerWebExchange exchange, final Object result) {
         // add mono attribute. Used at `ShenyuHttpWebHandlerAdapter#sendResponse` location
-//        exchange.getAttributes().put(Constants.RESPONSE_WRITE_WITH,                );
-        return result0(exchange, result).then(Mono.defer(exchange.getResponse()::setComplete));
+        exchange.getAttributes().put(Constants.RESPONSE_WRITE_WITH_MONO,
+                result0(exchange, result).then(Mono.defer(exchange.getResponse()::setComplete)));
+        return Mono.empty();
     }
 
     /**

@@ -4,14 +4,14 @@ import org.apache.shenyu.disruptor.DisruptorProviderManage;
 import org.apache.shenyu.disruptor.provider.DisruptorProvider;
 import org.apache.shenyu.web.configuration.ShenyuDisruptorConfig;
 import org.apache.shenyu.web.disruptor.consumer.ShenyuRequestConsumerExecutor.ShenyuRequestConsumerExecutorFactory;
-import reactor.core.publisher.Mono;
+import org.apache.shenyu.web.server.ShenyuRequestExchange;
 
 public class ShenyuRequestEventPublisher {
     
     private static final ShenyuRequestEventPublisher INSTANCE = new ShenyuRequestEventPublisher();
     
-    private DisruptorProviderManage<Mono> providerManage;
-    
+    private DisruptorProviderManage<ShenyuRequestExchange> providerManage;
+
     /**
      * Get instance.
      *
@@ -28,7 +28,7 @@ public class ShenyuRequestEventPublisher {
      * @param shenyuDisruptorConfig config
      */
     public void start(final ShenyuDisruptorConfig shenyuDisruptorConfig) {
-        ShenyuRequestConsumerExecutorFactory<Mono> factory = new ShenyuRequestConsumerExecutorFactory<>();
+        ShenyuRequestConsumerExecutorFactory<ShenyuRequestExchange> factory = new ShenyuRequestConsumerExecutorFactory<>();
         providerManage = new DisruptorProviderManage<>(factory, shenyuDisruptorConfig.getThreadSize(), shenyuDisruptorConfig.getBufferSize());
         providerManage.startup();
     }
@@ -38,8 +38,8 @@ public class ShenyuRequestEventPublisher {
      *
      * @param shenyuServerExchange the data
      */
-    public void publishEvent(final Mono shenyuServerExchange) {
-        DisruptorProvider<Mono> provider = providerManage.getProvider();
+    public void publishEvent(final ShenyuRequestExchange shenyuServerExchange) {
+        DisruptorProvider<ShenyuRequestExchange> provider = providerManage.getProvider();
         provider.onData(shenyuServerExchange);
     }
 }
