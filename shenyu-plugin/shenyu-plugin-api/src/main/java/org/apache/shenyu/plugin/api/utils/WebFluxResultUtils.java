@@ -54,7 +54,7 @@ public final class WebFluxResultUtils {
      */
     public static Mono<Void> result(final ServerWebExchange exchange, final Object result) {
         final Boolean responseWriteWithMonoBool = exchange.getAttribute(Constants.RESPONSE_HANDLER_SEND_DISRUPTOR_BOOL);
-        if (!Objects.isNull(responseWriteWithMonoBool) && !responseWriteWithMonoBool) {
+        if (!Objects.isNull(responseWriteWithMonoBool) && responseWriteWithMonoBool) {
             // add mono attribute. Used at `ShenyuHttpWebHandlerAdapter#sendResponse` location
             exchange.getAttributes().put(Constants.RESPONSE_HANDLER_SEND_DISRUPTOR_MONO,
                     result0(exchange, result).then(Mono.defer(exchange.getResponse()::setComplete)));

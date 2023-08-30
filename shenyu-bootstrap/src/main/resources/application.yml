@@ -102,6 +102,8 @@ shenyu:
       enabled: false
       cacheSize: 1024 # the number of selectors
       matchMode: antPathMatch
+  shenyuWorkThreadPool:
+    enable: true
   netty:
     http:
       # set to false, user can custom the netty tcp server config.
