@@ -29,7 +29,7 @@ public class ShenyuResponseConsumerExecutor<T extends Mono> extends QueueConsume
     
     @Override
     public void run() {
-        LOGGER.info("get response...");
+        LOGGER.info("send response...");
         // consumer response Mono
         getData().subscribe();
     }

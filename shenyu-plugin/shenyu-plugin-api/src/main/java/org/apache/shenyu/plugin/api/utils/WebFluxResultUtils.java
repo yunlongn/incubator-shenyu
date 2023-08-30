@@ -53,10 +53,14 @@ public final class WebFluxResultUtils {
      * @return the result
      */
     public static Mono<Void> result(final ServerWebExchange exchange, final Object result) {
-        // add mono attribute. Used at `ShenyuHttpWebHandlerAdapter#sendResponse` location
-        exchange.getAttributes().put(Constants.RESPONSE_WRITE_WITH_MONO,
-                result0(exchange, result).then(Mono.defer(exchange.getResponse()::setComplete)));
-        return Mono.empty();
+        final Boolean responseWriteWithMonoBool = exchange.getAttribute(Constants.RESPONSE_HANDLER_SEND_DISRUPTOR_BOOL);
+        if (!Objects.isNull(responseWriteWithMonoBool) && !responseWriteWithMonoBool) {
+            // add mono attribute. Used at `ShenyuHttpWebHandlerAdapter#sendResponse` location
+            exchange.getAttributes().put(Constants.RESPONSE_HANDLER_SEND_DISRUPTOR_MONO,
+                    result0(exchange, result).then(Mono.defer(exchange.getResponse()::setComplete)));
+            return Mono.empty();
+        }
+        return result0(exchange, result);
     }
 
     /**

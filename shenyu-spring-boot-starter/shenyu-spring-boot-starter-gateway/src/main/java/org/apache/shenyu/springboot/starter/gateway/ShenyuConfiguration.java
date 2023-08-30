@@ -90,7 +90,9 @@ public class ShenyuConfiguration {
      * @return {@linkplain ShenyuWebHandler}
      */
     @Bean("webHandler")
-    public ShenyuWebHandler shenyuWebHandler(final ObjectProvider<List<ShenyuPlugin>> plugins, final ShenyuConfig config, @Lazy final ShenyuLoaderService shenyuLoaderService) {
+    public ShenyuWebHandler shenyuWebHandler(final ObjectProvider<List<ShenyuPlugin>> plugins,
+                                             final ShenyuConfig config,
+                                             @Lazy final ShenyuLoaderService shenyuLoaderService) {
         List<ShenyuPlugin> pluginList = plugins.getIfAvailable(Collections::emptyList);
         List<ShenyuPlugin> shenyuPlugins = pluginList.stream()
                 .sorted(Comparator.comparingInt(ShenyuPlugin::getOrder)).collect(Collectors.toList());

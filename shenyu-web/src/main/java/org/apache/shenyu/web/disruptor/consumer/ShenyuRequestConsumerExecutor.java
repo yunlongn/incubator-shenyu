@@ -32,22 +32,22 @@ public class ShenyuRequestConsumerExecutor<T extends ShenyuRequestExchange> exte
     
     private static final Log LOGGER = HttpLogging.forLogName(ShenyuRequestConsumerExecutor.class);
 
-    private ShenyuResponseEventPublisher shenyuResponseEventPublisher = ShenyuResponseEventPublisher.getInstance();
+    private final ShenyuResponseEventPublisher shenyuResponseEventPublisher = ShenyuResponseEventPublisher.getInstance();
     
     @Override
     public void run() {
-        LOGGER.info("send request...");
         final ShenyuRequestExchange shenyuRequestExchange = getData();
+        LOGGER.info("get request...");
         new Thread(() -> {
             try {
-                Thread.sleep(3000);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
             Mono<Void> execute = new ShenyuWebHandler.DefaultShenyuPluginChain(shenyuRequestExchange.getPlugins()).execute(shenyuRequestExchange.getExchange());
             execute.doOnSubscribe(s -> {
                 final ServerWebExchange requestExchangeExchange = shenyuRequestExchange.getExchange();
-                final Mono responstWriteWithMono = requestExchangeExchange.getAttribute(Constants.RESPONSE_WRITE_WITH_MONO);
+                final Mono responstWriteWithMono = requestExchangeExchange.getAttribute(Constants.RESPONSE_HANDLER_SEND_DISRUPTOR_MONO);
                 shenyuResponseEventPublisher.publishEvent(responstWriteWithMono);
             }).subscribe();
         }).start();

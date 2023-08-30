@@ -20,6 +20,7 @@ package org.apache.shenyu.web.handler;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shenyu.common.config.ShenyuConfig;
+import org.apache.shenyu.common.constant.Constants;
 import org.apache.shenyu.common.dto.PluginData;
 import org.apache.shenyu.common.enums.PluginHandlerEventEnum;
 import org.apache.shenyu.plugin.api.ShenyuPlugin;
@@ -66,6 +67,8 @@ public final class ShenyuWebHandler implements WebHandler, ApplicationListener<P
 
     private final ShenyuLoaderService shenyuLoaderService;
 
+    private final ShenyuConfig shenyuConfig;
+
     private final ShenyuRequestEventPublisher shenyuRequestEventPublisher = ShenyuRequestEventPublisher.getInstance();
 
     private final boolean scheduled;
@@ -83,6 +86,7 @@ public final class ShenyuWebHandler implements WebHandler, ApplicationListener<P
         this.sourcePlugins = new ArrayList<>(plugins);
         this.plugins = new ArrayList<>(plugins);
         this.shenyuLoaderService = shenyuLoaderService;
+        this.shenyuConfig = shenyuConfig;
         ShenyuConfig.Scheduler config = shenyuConfig.getScheduler();
         this.scheduled = config.getEnabled();
         if (scheduled) {
@@ -102,9 +106,16 @@ public final class ShenyuWebHandler implements WebHandler, ApplicationListener<P
      */
     @Override
     public Mono<Void> handle(@NonNull final ServerWebExchange exchange) {
-
-        shenyuRequestEventPublisher.publishEvent(new ShenyuRequestExchange(exchange, plugins));
-        return Mono.never();
+        if (Objects.isNull(shenyuConfig.getShenyuWorkThreadPool()) && shenyuConfig.getShenyuWorkThreadPool().getEnabled()) {
+            exchange.getAttributes().put(Constants.RESPONSE_HANDLER_SEND_DISRUPTOR_BOOL, true);
+            shenyuRequestEventPublisher.publishEvent(new ShenyuRequestExchange(exchange, plugins));
+            return Mono.never();
+        }
+        final Mono<Void> execute = new DefaultShenyuPluginChain(plugins).execute(exchange);
+        if (scheduled) {
+            return execute.subscribeOn(scheduler);
+        }
+        return execute;
     }
     
     /**
