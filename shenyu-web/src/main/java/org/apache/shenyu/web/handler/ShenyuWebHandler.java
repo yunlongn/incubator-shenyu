@@ -24,10 +24,9 @@ import org.apache.shenyu.common.dto.PluginData;
 import org.apache.shenyu.common.enums.PluginHandlerEventEnum;
 import org.apache.shenyu.plugin.api.ShenyuPlugin;
 import org.apache.shenyu.plugin.api.ShenyuPluginChain;
-import org.apache.shenyu.plugin.api.result.ShenyuResultWrap;
-import org.apache.shenyu.plugin.api.utils.WebFluxResultUtils;
 import org.apache.shenyu.plugin.base.cache.BaseDataCache;
 import org.apache.shenyu.plugin.base.cache.PluginHandlerEvent;
+import org.apache.shenyu.web.disruptor.ShenyuRequestEventPublisher;
 import org.apache.shenyu.web.loader.ShenyuLoaderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +64,8 @@ public final class ShenyuWebHandler implements WebHandler, ApplicationListener<P
     private final List<ShenyuPlugin> sourcePlugins;
 
     private final ShenyuLoaderService shenyuLoaderService;
+
+    private final ShenyuRequestEventPublisher shenyuRequestEventPublisher = ShenyuRequestEventPublisher.getInstance();
 
     private final boolean scheduled;
 
@@ -104,7 +105,8 @@ public final class ShenyuWebHandler implements WebHandler, ApplicationListener<P
         if (scheduled) {
             return execute.subscribeOn(scheduler);
         }
-        return execute;
+        shenyuRequestEventPublisher.publishEvent(execute);
+        return Mono.never();
     }
     
     /**

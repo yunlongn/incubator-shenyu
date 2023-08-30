@@ -3,7 +3,7 @@ package org.apache.shenyu.web.disruptor;
 import org.apache.shenyu.disruptor.DisruptorProviderManage;
 import org.apache.shenyu.disruptor.provider.DisruptorProvider;
 import org.apache.shenyu.web.configuration.ShenyuDisruptorConfig;
-import org.springframework.http.server.reactive.ShenyuResponseConsumerExecutor;
+import org.apache.shenyu.web.disruptor.consumer.ShenyuResponseConsumerExecutor;
 import reactor.core.publisher.Mono;
 
 public class ShenyuResponseEventPublisher {

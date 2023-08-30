@@ -3,14 +3,14 @@ package org.apache.shenyu.web.disruptor;
 import org.apache.shenyu.disruptor.DisruptorProviderManage;
 import org.apache.shenyu.disruptor.provider.DisruptorProvider;
 import org.apache.shenyu.web.configuration.ShenyuDisruptorConfig;
-import org.apache.shenyu.web.server.ShenyuServerExchange;
-import org.springframework.http.server.reactive.ShenyuRequestConsumerExecutor.ShenyuRequestConsumerExecutorFactory;
+import org.apache.shenyu.web.disruptor.consumer.ShenyuRequestConsumerExecutor.ShenyuRequestConsumerExecutorFactory;
+import reactor.core.publisher.Mono;
 
 public class ShenyuRequestEventPublisher {
     
     private static final ShenyuRequestEventPublisher INSTANCE = new ShenyuRequestEventPublisher();
     
-    private DisruptorProviderManage<ShenyuServerExchange> providerManage;
+    private DisruptorProviderManage<Mono> providerManage;
     
     /**
      * Get instance.
@@ -28,7 +28,7 @@ public class ShenyuRequestEventPublisher {
      * @param shenyuDisruptorConfig config
      */
     public void start(final ShenyuDisruptorConfig shenyuDisruptorConfig) {
-        ShenyuRequestConsumerExecutorFactory<ShenyuServerExchange> factory = new ShenyuRequestConsumerExecutorFactory<>();
+        ShenyuRequestConsumerExecutorFactory<Mono> factory = new ShenyuRequestConsumerExecutorFactory<>();
         providerManage = new DisruptorProviderManage<>(factory, shenyuDisruptorConfig.getThreadSize(), shenyuDisruptorConfig.getBufferSize());
         providerManage.startup();
     }
@@ -38,8 +38,8 @@ public class ShenyuRequestEventPublisher {
      *
      * @param shenyuServerExchange the data
      */
-    public void publishEvent(final ShenyuServerExchange shenyuServerExchange) {
-        DisruptorProvider<ShenyuServerExchange> provider = providerManage.getProvider();
+    public void publishEvent(final Mono shenyuServerExchange) {
+        DisruptorProvider<Mono> provider = providerManage.getProvider();
         provider.onData(shenyuServerExchange);
     }
 }
