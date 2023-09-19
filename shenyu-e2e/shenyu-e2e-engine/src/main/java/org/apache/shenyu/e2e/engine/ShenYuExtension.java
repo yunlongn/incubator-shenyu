@@ -25,6 +25,7 @@ import org.apache.shenyu.e2e.annotation.ShenYuGatewayClient;
 import org.apache.shenyu.e2e.annotation.ShenYuInjectable;
 import org.apache.shenyu.e2e.engine.annotation.ShenYuTest;
 import org.apache.shenyu.e2e.engine.config.ShenYuEngineConfigure;
+import org.apache.shenyu.e2e.engine.service.DockerServiceCompose;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -37,6 +38,8 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.platform.commons.util.AnnotationUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.DockerClientFactory;
 
 import java.util.Objects;
@@ -46,20 +49,25 @@ import java.util.Objects;
  */
 public class ShenYuExtension implements BeforeAllCallback, ExecutionCondition, AfterAllCallback, ParameterResolver {
 
+    private static final Logger log = LoggerFactory.getLogger(DockerServiceCompose.class);
+
     private static final Namespace NAMESPACE = Namespace.create(ShenYuExtension.class);
 
     private static final String KEY_EXTENSION_CONTEXT = "_shenyu_service_compose_";
+
+    private static final String START_TIME = "_shenyu_service_start_time_";
 
     private static final String KEY_ENGINE_CONFIGURE = "_shenyu_engine_configure_";
     
     @Override
     public void beforeAll(final ExtensionContext extensionContext) throws Exception {
         Store store = extensionContext.getStore(NAMESPACE);
-        
+        final long startTime = System.currentTimeMillis();
+        store.put(START_TIME, startTime);
         ShenYuEngineConfigure configure = store.get(KEY_ENGINE_CONFIGURE, ShenYuEngineConfigure.class);
         ShenYuExtensionContext context = createExtensionContext(configure);
         context.setup();
-        
+        log.warn("ShenYu test engine beforeAll in {} ms", System.currentTimeMillis() - startTime);
         store.put(KEY_EXTENSION_CONTEXT, context);
     }
     
@@ -120,7 +128,10 @@ public class ShenYuExtension implements BeforeAllCallback, ExecutionCondition, A
         Store store = extensionContext.getStore(NAMESPACE);
         ShenYuExtensionContext context = store.get(KEY_EXTENSION_CONTEXT, ShenYuExtensionContext.class);
         Assertions.assertTrue(Objects.nonNull(context), "ShenYuExtensionContext is non-nullable");
+        final Long startTime = store.get(START_TIME, Long.class);
+        log.warn("ShenYu test engine afterAll in {} ms", System.currentTimeMillis() - startTime);
         context.cleanup();
+        log.warn("ShenYu test engine finished in {} ms", System.currentTimeMillis() - startTime);
     }
     
     static ShenYuExtensionContext createExtensionContext(final ShenYuEngineConfigure config) {
