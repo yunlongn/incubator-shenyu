@@ -71,8 +71,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-e2e-maven-
 
-      - uses: download-artifact
-        name: actions/download-artifact@v3
+      - name: download-artifact
+        uses: actions/download-artifact@v3
         with:
           name: shenyu-images
           path: /tmp2/
