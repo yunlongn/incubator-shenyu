@@ -71,6 +71,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-e2e-maven-
 
+      - uses: download-artifact
+        name: actions/download-artifact@v3
+        with:
+          name: shenyu-images
+          path: /tmp2/
+
       - name: Set up JDK 8 for Building ShenYu
         uses: actions/setup-java@v3
         with:
